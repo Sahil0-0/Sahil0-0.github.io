@@ -20,11 +20,17 @@ export default function Home() {
 
         <div className="relative z-10 w-fit self-end flex flex-col items-end gap-3 p-6">
           <AvailableBadge />
+          <h1 style={{ fontFamily: 'var(--font-ibm-plex-sans)', fontSize: '67px', fontWeight: 300, lineHeight: '1' }}>
+            One pixel
+          </h1>
+          <h1 style={{ fontFamily: 'var(--font-ibm-plex-sans)', fontSize: '67px', fontWeight: 300, lineHeight: '1' }}>
+          at a time <span className="text-secondary">.</span>
+          </h1>
         </div>
 
         <div className="flex-1" />
 
-        <div className="relative z-10 flex justify-between items-end p-6">
+        <div className="relative z-10 flex justify-between items-end p-6">  
           <BottomNav />
           <div className="flex flex-col items-end gap-1">
             <a
