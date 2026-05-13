@@ -10,10 +10,10 @@ export default function Home() {
       <main className="relative flex-1 flex flex-col overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/images/bg_color.jpeg"
+            src="/images/bg_dark.png"
             alt=""
             fill
-            className="object-cover opacity-25"
+            className="object-cover"
             priority
           />
         </div>
