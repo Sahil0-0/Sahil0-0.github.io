@@ -29,6 +29,9 @@ body {
 
 html, body, *, a, button { cursor: none !important; }
 
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* ── Typography utilities ── */
 @layer utilities {
   /* Hero display — IBM Plex Sans bold, fluid size */
@@ -124,4 +127,5 @@ html, body, *, a, button { cursor: none !important; }
     line-height: 1.5;
     letter-spacing: 0.02em;
   }
+
 }
