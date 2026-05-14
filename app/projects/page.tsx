@@ -33,15 +33,38 @@ export default function Projects() {
   }, []);
 
   useEffect(() => {
-    const container = hScrollRef.current;
-    if (!container) return;
-    const onWheel = (e: WheelEvent) => {
-      if (listRef.current?.contains(e.target as Node)) return;
-      e.preventDefault();
-      container.scrollLeft += e.deltaY;
+    const main = mainRef.current;
+    if (!main) return;
+    let targetY = 0;
+    let rafId = 0;
+    const tick = () => {
+      const list = listRef.current;
+      if (!list) {
+        rafId = 0;
+        return;
+      }
+      const diff = targetY - list.scrollTop;
+      if (Math.abs(diff) < 0.5) {
+        list.scrollTop = targetY;
+        rafId = 0;
+        return;
+      }
+      list.scrollTop += diff * 0.15;
+      rafId = requestAnimationFrame(tick);
     };
-    container.addEventListener("wheel", onWheel, { passive: false });
-    return () => container.removeEventListener("wheel", onWheel);
+    const onWheel = (e: WheelEvent) => {
+      const list = listRef.current;
+      if (!list) return;
+      e.preventDefault();
+      if (!rafId) targetY = list.scrollTop;
+      targetY = Math.max(0, Math.min(targetY + e.deltaY, list.scrollHeight - list.clientHeight));
+      if (!rafId) rafId = requestAnimationFrame(tick);
+    };
+    main.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      main.removeEventListener("wheel", onWheel);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const filteredProjects = useMemo(
@@ -116,15 +139,15 @@ export default function Projects() {
           <>
             <div
               className="absolute pointer-events-none z-20 -translate-y-full pb-1"
-              style={{ top: cursorY, left: detailsLeft + 24, right: 340 }}
+              style={{ top: cursorY, left: detailsLeft + 4, right: 340 }}
             >
-              <h2 className="font-sans font-thin text-[50px] leading-none text-white uppercase tracking-wide">
+              <h2 className="font-label font-regular text-[50px] leading-none text-white uppercase tracking-wide">
                 {hoveredProject.name}
               </h2>
             </div>
             <div
               className="absolute pointer-events-none z-20 flex items-center gap-3 pt-1"
-              style={{ top: cursorY, left: detailsLeft + 24, right: 340 }}
+              style={{ top: cursorY, left: detailsLeft + 4, right: 340 }}
             >
               <span className="font-sans text-sm text-white/80">{hoveredProject.role}</span>
               <span className="w-2 h-2 bg-yellow-400 flex-shrink-0" />
@@ -154,14 +177,14 @@ export default function Projects() {
             <div ref={vertBarRef} className="bg-yellow-400 col-start-2 row-start-1 row-span-2" />
 
             {/* Col 3 — filter (left) + thumbnail list (right) */}
-            <div className="col-start-4 row-start-1 row-span-2 flex flex-row px-6 gap-6 h-full min-h-0">
-              <div className="flex flex-col items-end py-6 gap-3 shrink-0">
+            <div className="col-start-4 row-start-1 row-span-2 flex flex-row px-2 gap-2 h-full min-h-0">
+              <div className="flex flex-col items-end py- gap-2 shrink-0">
                 {FILTERS.map((f) => (
                   <button
                     key={f}
                     onClick={() => setActiveFilter(f)}
-                    className={`font-sans text-sm text-right transition-colors ${
-                      activeFilter === f ? "text-white" : "text-white hover:text-white/70"
+                    className={`font-mono text-sm text-right transition-colors ${
+                      activeFilter === f ? "text-secondary" : "text-white hover:text-secondary"
                     }`}
                   >
                     {f}
@@ -172,7 +195,7 @@ export default function Projects() {
               
               <div
                 ref={listRef}
-                className="project-list w-[220px] flex-1 overflow-y-auto flex flex-col min-h-0 py-[200px]"
+                className="project-list w-[220px] flex-1 overflow-y-auto flex flex-col min-h-0 py-[180px]"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
               >
                 {filteredProjects.map((project, i) => (
@@ -185,7 +208,9 @@ export default function Projects() {
                       src={project.image}
                       alt={project.name}
                       fill
-                      className="object-contain object-left drop-shadow-2xl pb-2"
+                      className={`object-contain object-left drop-shadow-2xl ${
+                        i === filteredProjects.length - 1 ? "" : "pb-2"
+                      }`}
                     />
                   </div>
                 ))}
