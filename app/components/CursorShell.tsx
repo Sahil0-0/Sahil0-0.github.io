@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  getLastCursorPosition,
+  setLastCursorPosition,
+} from "@/app/components/cursorPosition";
 
 const DOT_ONLY_ROUTES = ["/projects"];
 const CURSOR_RADIUS = 72;
@@ -28,9 +32,25 @@ export default function CursorShell({ children }: { children: React.ReactNode })
   const [isOverProject, setIsOverProject] = useState(false);
   const [portal, setPortal] = useState<Portal | null>(null);
   const portalRef = useRef<Portal | null>(null);
-  portalRef.current = portal;
   const cursorRef = useRef<{ x: number; y: number } | null>(null);
-  cursorRef.current = cursor;
+
+  useEffect(() => {
+    portalRef.current = portal;
+  }, [portal]);
+
+  useEffect(() => {
+    cursorRef.current = cursor;
+  }, [cursor]);
+
+  useEffect(() => {
+    if (!dotOnly || cursorRef.current) return;
+    setCursor(
+      getLastCursorPosition() ?? {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      },
+    );
+  }, [dotOnly]);
 
   const triggerPortal = (x: number, y: number, href: string) => {
     if (portalRef.current) return;
@@ -44,7 +64,9 @@ export default function CursorShell({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      setCursor({ x: e.clientX, y: e.clientY });
+      const nextCursor = { x: e.clientX, y: e.clientY };
+      setLastCursorPosition(nextCursor);
+      setCursor(nextCursor);
       setIsOverLink(!!(e.target as Element).closest("a, button, [data-no-cursor]"));
       setIsOverProject(!!(e.target as Element).closest("[data-cursor='plus']"));
     };
