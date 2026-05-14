@@ -60,9 +60,6 @@ export default function CursorShell({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (pathname === "/") router.prefetch("/projects");
-    if (pathname.startsWith("/projects")) {
-      setCursor({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-    }
   }, [pathname, router]);
 
   useEffect(() => {

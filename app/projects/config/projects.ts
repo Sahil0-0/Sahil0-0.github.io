@@ -4,6 +4,7 @@ export type Project = {
   tech: string;
   period: string;
   image: string;
+  category: string;
 };
 
 const under25: Project = {
@@ -11,7 +12,18 @@ const under25: Project = {
   role: "Mobile Developer",
   tech: "Flutter",
   period: "2024 - present",
-  image: "/images/under25.png",
+  image: "/images/under25Work.png",
+  category: "Mobile",
 };
 
-export const projects: Project[] = Array(10).fill(under25);
+const bruisedPassports: Project = {
+  name: "Bruised Passports",
+  role: "Mobile Developer",
+  tech: "Flutter",
+  period: "2024 - present",
+  image: "/images/bruisedPassports.png",
+  category: "Mobile",
+};
+
+const base: Project[] = [under25, bruisedPassports];
+export const projects: Project[] = Array.from({ length: 10 }, (_, i) => base[i % 2]);
