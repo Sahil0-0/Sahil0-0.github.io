@@ -1,131 +1,58 @@
 @import "tailwindcss";
 
-/* ── Theme tokens ── */
 :root {
-  --background: #212322;
-  --foreground: #ededed;
-  --secondary: #FDE047;
-  --border-grey: #444444;
-  --primary: #ffffff;
+  --background: #FAFAFA;
+  --background-dark: #000000;
+  --text-primary: #1F1F1F;
+  --text-links: #A4A4A4;
+  --text-subtitle: #666666;
+  --divider: #A4A4A4;
+  --left-panel-footer-height: 133px;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-secondary: var(--secondary);
-  --color-border-grey: var(--border-grey);
-  --color-text-primary: var(--primary);
+  --color-background-dark: var(--background-dark);
+  --color-text-primary: var(--text-primary);
+  --color-text-links: var(--text-links);
+  --color-text-subtitle: var(--text-subtitle);
+  --color-divider: var(--divider);
 
-  --font-sans: var(--font-ibm-plex-sans), sans-serif;
-  --font-mono: var(--font-menlo), Menlo, Consolas, "Courier New", monospace;
+  --font-urbanist: var(--nf-urbanist), sans-serif;
+  --font-inter: var(--nf-inter), sans-serif;
+  --font-manrope: var(--nf-manrope), sans-serif;
+  --font-google-sans: var(--nf-google-sans-flex), sans-serif;
 }
 
-/* ── Base styles ── */
+html, body {
+  overflow: hidden;
+}
+
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+  color: var(--text-primary);
+  font-family: var(--font-urbanist);
 }
-
-html, body, *, a, button { cursor: none !important; }
 
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* ── Typography utilities ── */
-@layer utilities {
-  /* Hero display — IBM Plex Sans bold, fluid size */
-  .type-display {
-    font-family: var(--font-sans);
-    font-size: clamp(3.5rem, 10vw, 8rem);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
 
-  /* Section heading — IBM Plex Sans semibold */
-  .type-heading {
-    font-family: var(--font-sans);
-    font-size: clamp(1.5rem, 4vw, 2.5rem);
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-  }
+@keyframes drawLineDown {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0% 0); }
+}
 
-  /* Sub-heading — IBM Plex Sans medium */
-  .type-subheading {
-    font-family: var(--font-sans);
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
-    font-weight: 500;
-    line-height: 1.4;
-  }
+@keyframes drawLineLeft {
+  from { clip-path: inset(0 0% 0 100%); }
+  to   { clip-path: inset(0 0% 0 0%); }
+}
 
-  /* Body copy — IBM Plex Sans regular */
-  .type-body {
-    font-family: var(--font-sans);
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.7;
-  }
-
-  /* Secondary body — IBM Plex Sans light */
-  .type-body-light {
-    font-family: var(--font-sans);
-    font-size: 1rem;
-    font-weight: 300;
-    line-height: 1.7;
-  }
-
-  /* Small uppercase label — Menlo (e.g. "AVAILABLE FOR WORK") */
-  .type-label {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    font-weight: 400;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  /* Mono body — Menlo regular */
-  .type-mono {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    font-weight: 400;
-    line-height: 1.6;
-  }
-
-  /* Mono bold — Menlo bold */
-  .type-mono-bold {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    font-weight: 700;
-    line-height: 1.6;
-  }
-
-  /* Mono italic — Menlo italic */
-  .type-mono-italic {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    font-weight: 400;
-    font-style: italic;
-    line-height: 1.6;
-  }
-
-  /* Mono bold italic — Menlo bold italic */
-  .type-mono-bold-italic {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    font-weight: 700;
-    font-style: italic;
-    line-height: 1.6;
-  }
-
-  /* Caption / footnote — IBM Plex Sans thin */
-  .type-caption {
-    font-family: var(--font-sans);
-    font-size: 0.75rem;
-    font-weight: 100;
-    line-height: 1.5;
-    letter-spacing: 0.02em;
-  }
-
+@keyframes drawLineUp {
+  from { clip-path: inset(100% 0 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
 }
