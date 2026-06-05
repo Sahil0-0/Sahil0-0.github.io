@@ -81,7 +81,8 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
         </motion.button>
         <motion.div
           className="absolute top-0 right-0 w-px h-screen bg-divider"
-          style={{ animation: "drawLineDown 3s ease 2s both" }}
+          initial={{ clipPath: "inset(0 0 100% 0)" }}
+          animate={{ clipPath: "inset(0 0 0% 0)", transition: { duration: 0.6, ease: "easeOut", delay: 0.3 } }}
           exit={{ clipPath: "inset(0 0 100% 0)", transition: { duration: 0.12, ease: "easeIn" } }}
         />
       </div>
@@ -109,10 +110,12 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
                 return (
                   <motion.div
                     key={project.image}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1, transition: { type: "spring", stiffness: 420, damping: 22, delay: i * 0.04 } }}
-                    exit={{ scale: 0, opacity: 0, transition: { type: "spring", stiffness: 420, damping: 22 } }}
-                    className="relative shrink-0 w-[70px] h-[70px] flex items-center justify-center"
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    animate={{ scale: 1, opacity: isSelected ? 1 : 0.5, transition: { type: "spring", stiffness: 600, damping: 24, delay: i * 0.01 } }}
+                    exit={{ scale: 0.7, opacity: 0, transition: { type: "spring", stiffness: 500, damping: 24 } }}
+                    whileHover={!isSelected ? { opacity: 0.75 } : {}}
+                    onClick={() => onSelect(project)}
+                    className="relative shrink-0 w-[70px] h-[70px] cursor-pointer"
                   >
                     <AnimatePresence>
                       {isSelected && (
@@ -127,19 +130,15 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                    <button
-                      onClick={() => onSelect(project)}
-                      className={`relative w-[60px] h-[60px] rounded-[8px] overflow-hidden transition-all duration-200 cursor-pointer ${
-                        isSelected ? "opacity-100" : "opacity-50 hover:opacity-75"
-                      }`}
-                    >
+                    <div className="absolute inset-[5px] rounded-[8px] overflow-hidden">
                       <Image
                         src={project.image}
                         alt={project.name}
                         fill
+                        priority
                         className="object-cover"
                       />
-                    </button>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -151,14 +150,14 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
       </div>
 
       <div className="absolute right-[24px] bottom-[14px] flex items-center gap-[10px] z-10">
-        <div className="flex items-center bg-divider/15 rounded-full p-[3px] gap-[2px]">
+        <div className="flex items-center bg-background rounded-full p-[3px] gap-[2px] shadow-md">
           {(["draw", "code"] as const).map((mode) => {
             const isActive = viewMode === mode;
             return (
               <button
                 key={mode}
                 onClick={() => setViewMode(viewMode === mode ? null : mode)}
-                className={`w-[30px] h-[30px] flex items-center justify-center rounded-[99px] transition-all cursor-pointer ${
+                className={`w-[30px] h-[30px] flex items-center justify-center rounded-full transition-all cursor-pointer ${
                   isActive ? "bg-background text-text-primary" : "text-text-links hover:text-text-primary"
                 }`}
               >
