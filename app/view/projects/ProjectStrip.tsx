@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { projects, Project } from "@/app/config/projects";
 import CornerBrackets from "@/app/components/CornerBrackets";
+import ViewModeToggle from "@/app/components/ViewModeToggle";
 
 type Props = {
   selected: Project;
@@ -19,7 +20,15 @@ const VIEW_MODE_TAG: Record<"draw" | "code", string> = {
 
 export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const selectedRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<"draw" | "code" | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      selectedRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = viewMode
     ? projects.filter((p) => p.tags.includes(VIEW_MODE_TAG[viewMode]))
@@ -30,10 +39,6 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
     return acc;
   }, {});
   const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
-
-  function scroll(dir: "left" | "right") {
-    scrollRef.current?.scrollBy({ left: dir === "right" ? 220 : -220, behavior: "smooth" });
-  }
 
   return (
     <motion.div
@@ -48,7 +53,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
         },
       }}
       exit={{ y: "-100%", transition: { duration: 0.18, ease: "easeIn", delay: 0.13 } }}
-      className="w-[60vw] bg-background flex items-stretch shrink-0 relative"
+      className="w-full bg-background flex items-stretch shrink-0 relative"
     >
       <motion.div
         className="absolute bottom-0 left-0 right-0 h-px bg-divider"
@@ -80,7 +85,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
           />
         </motion.button>
         <motion.div
-          className="absolute top-0 right-0 w-px h-screen bg-divider"
+          className="absolute top-0 right-0 w-px h-full bg-divider"
           initial={{ clipPath: "inset(0 0 100% 0)" }}
           animate={{ clipPath: "inset(0 0 0% 0)", transition: { duration: 0.6, ease: "easeOut", delay: 0.3 } }}
           exit={{ clipPath: "inset(0 0 100% 0)", transition: { duration: 0.12, ease: "easeIn" } }}
@@ -89,93 +94,68 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
 
       <div
         ref={scrollRef}
-        className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-[32px] px-[24px] pt-[12px] pb-[18px]"
+        className="flex-1 overflow-x-auto no-scrollbar flex items-center px-[24px] pt-[12px] pb-[18px]"
       >
-        <AnimatePresence mode="popLayout">
-        {years.map((year) => (
+        <AnimatePresence mode="wait">
           <motion.div
-            key={year}
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1, transition: { type: "spring", stiffness: 420, damping: 24 } }}
-            exit={{ scale: 0.85, opacity: 0, transition: { type: "spring", stiffness: 420, damping: 24 } }}
-            className="flex flex-col shrink-0 gap-[6px]"
+            key={viewMode ?? "all"}
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1, transition: { type: "spring", stiffness: 420, damping: 26 } }}
+            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.12, ease: "easeIn" } }}
+            className="flex items-center gap-[32px]"
           >
-            <span className="font-inter text-[12px] uppercase tracking-[0.1em] text-text-subtitle">
-              {year}
-            </span>
-            <div className="flex gap-[6px]">
-              <AnimatePresence mode="popLayout">
-              {byYear[year].map((project, i) => {
-                const isSelected = selected.image === project.image;
-                return (
-                  <motion.div
-                    key={project.image}
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: isSelected ? 1 : 0.5, transition: { type: "spring", stiffness: 600, damping: 24, delay: i * 0.01 } }}
-                    exit={{ scale: 0.7, opacity: 0, transition: { type: "spring", stiffness: 500, damping: 24 } }}
-                    whileHover={!isSelected ? { opacity: 0.75 } : {}}
-                    onClick={() => onSelect(project)}
-                    className="relative shrink-0 w-[70px] h-[70px] cursor-pointer"
-                  >
-                    <AnimatePresence>
-                      {isSelected && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute inset-0 z-10"
-                        >
-                          <CornerBrackets />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                    <div className="absolute inset-[5px] rounded-[8px] overflow-hidden">
-                      <Image
-                        src={project.image}
-                        alt={project.name}
-                        fill
-                        priority
-                        className="object-cover"
-                      />
-                    </div>
-                  </motion.div>
-                );
-              })}
-              </AnimatePresence>
-            </div>
+            {years.map((year) => (
+              <div key={year} className="flex flex-col shrink-0 gap-[6px]">
+                <span className="font-inter text-[12px] uppercase tracking-[0.1em] text-text-subtitle">
+                  {year}
+                </span>
+                <div className="flex gap-[6px]">
+                  {byYear[year].map((project, i) => {
+                    const isSelected = selected.image === project.image;
+                    return (
+                      <motion.div
+                        ref={isSelected ? selectedRef : undefined}
+                        key={project.image}
+                        initial={{ scale: 0.7, opacity: 0 }}
+                        animate={{ scale: 1, opacity: isSelected ? 1 : 0.5, transition: { type: "spring", stiffness: 600, damping: 24, delay: i * 0.03 } }}
+                        whileHover={!isSelected ? { opacity: 0.75 } : {}}
+                        onClick={() => onSelect(project)}
+                        className="relative shrink-0 w-[70px] h-[70px] cursor-pointer"
+                      >
+                        <AnimatePresence>
+                          {isSelected && (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-0 z-10"
+                            >
+                              <CornerBrackets />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        <div className="absolute inset-[5px] rounded-[8px] overflow-hidden">
+                          <Image
+                            src={project.image}
+                            alt={project.name}
+                            fill
+                            priority
+                            className="object-cover"
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </motion.div>
-        ))}
         </AnimatePresence>
       </div>
 
-      <div className="absolute right-[24px] bottom-[14px] flex items-center gap-[10px] z-10">
-        <div className="flex items-center bg-background rounded-full p-[3px] gap-[2px] shadow-md">
-          {(["draw", "code"] as const).map((mode) => {
-            const isActive = viewMode === mode;
-            return (
-              <button
-                key={mode}
-                onClick={() => setViewMode(viewMode === mode ? null : mode)}
-                className={`w-[30px] h-[30px] flex items-center justify-center rounded-full transition-all cursor-pointer ${
-                  isActive ? "bg-background text-text-primary" : "text-text-links hover:text-text-primary"
-                }`}
-              >
-                <span
-                  className="w-[16px] h-[16px] bg-current transition-colors"
-                  style={{
-                    maskImage: `url('/icons/${mode}Icon.svg')`,
-                    maskSize: "contain",
-                    maskRepeat: "no-repeat",
-                    WebkitMaskImage: `url('/icons/${mode}Icon.svg')`,
-                    WebkitMaskSize: "contain",
-                    WebkitMaskRepeat: "no-repeat",
-                  }}
-                />
-              </button>
-            );
-          })}
-        </div>
+      <div className="absolute right-[24px] bottom-[14px] z-10">
+        <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} variant="strip" />
       </div>
     </motion.div>
   );

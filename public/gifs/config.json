@@ -1,0 +1,7 @@
+[
+  { "src": "/gifs/goku-ssj3.gif",                            "type": "static" },
+  { "src": "/gifs/pikachu-running.gif",                      "type": "run"    },
+  { "src": "/gifs/snorlax-sleeping.gif",                     "type": "static" },
+  { "src": "/gifs/sonic-running.gif",                        "type": "run" },
+  { "src": "/gifs/toothless.gif",                            "type": "static" }
+]

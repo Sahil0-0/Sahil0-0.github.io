@@ -12,6 +12,8 @@ import { Project } from "@/app/config/projects";
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>(TABS[0]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showNames, setShowNames] = useState(false);
+  const [viewMode, setViewMode] = useState<"draw" | "code" | null>(null);
   const [stripMounted, setStripMounted] = useState(false);
   const stripTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const isReturning = useRef(false);
@@ -43,17 +45,6 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {selectedProject && (
-          <motion.div
-            key="project-vline"
-            className="absolute top-0 left-[60vw] w-px h-full bg-divider z-10 pointer-events-none"
-            initial={{ clipPath: "inset(100% 0 0 0)" }}
-            animate={{ clipPath: "inset(0% 0 0 0)", transition: { delay: 0.75, duration: 1.5, ease: "easeOut" } }}
-            exit={{ clipPath: "inset(100% 0 0 0)", transition: { duration: 0.12, ease: "easeIn" } }}
-          />
-        )}
-      </AnimatePresence>
 
       <div className="flex-1 min-h-0 flex relative">
         <AnimatePresence>
@@ -80,7 +71,15 @@ export default function Home() {
                 isReturning.current = false;
               }}
             >
-              <LeftPanel isReturning={isReturning.current} />
+              <LeftPanel
+                isReturning={isReturning.current}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                showNames={showNames}
+                onShowNamesChange={setShowNames}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -112,6 +111,8 @@ export default function Home() {
                 onTabChange={setActiveTab}
                 selectedProject={selectedProject}
                 onProjectSelect={setSelectedProject}
+                showNames={showNames}
+                viewMode={viewMode}
               />
             </motion.div>
           )}
@@ -121,20 +122,54 @@ export default function Home() {
           {selectedProject && (
             <motion.div
               key="project-panels"
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: 1,
-                transition: { delay: 0.5, duration: 0.25 },
-              }}
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0, transition: { duration: 0.1 } }}
-              className="w-full h-full flex"
+              className="w-full h-full overflow-hidden"
             >
-              <div className="flex-[3] min-w-0 h-full">
-                <ProjectMain project={selectedProject} />
-              </div>
-              <div className="flex-[2] min-w-0 h-full relative">
-                <ProjectAside project={selectedProject} />
-              </div>
+              <AnimatePresence mode="wait">
+                {selectedProject.tags.includes("art") ? (
+                  <motion.div
+                    key="art-view"
+                    className="w-full h-full"
+                    initial={{ x: "100%" }}
+                    animate={{ x: 0, transition: { type: "spring", stiffness: 340, damping: 32 } }}
+                    exit={{ x: "-100%", transition: { duration: 0.28, ease: "easeIn" } }}
+                  >
+                    <ProjectMain project={selectedProject} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="code-view"
+                    className="w-full h-full flex overflow-hidden"
+                    initial="enter"
+                    animate="show"
+                    exit="exit"
+                    variants={{ enter: {}, show: {}, exit: { transition: { duration: 0.28 } } }}
+                  >
+                    <motion.div
+                      className="flex-[3] min-w-0 h-full"
+                      variants={{
+                        enter: { x: "-100%", y: 0 },
+                        show: { x: 0, y: 0, transition: { type: "spring", stiffness: 340, damping: 32, delay: 0.6 } },
+                        exit: { x: "-100%", y: 0, transition: { duration: 0.28, ease: "easeIn" } },
+                      }}
+                    >
+                      <ProjectMain project={selectedProject} />
+                    </motion.div>
+                    <motion.div
+                      className="flex-[2] min-w-0 h-full"
+                      variants={{
+                        enter: { x: "100%", y: 0 },
+                        show: { x: 0, y: 0, transition: { type: "spring", stiffness: 340, damping: 32, delay: 0.6 } },
+                        exit: { x: "100%", y: 0, transition: { duration: 0.28, ease: "easeIn" } },
+                      }}
+                    >
+                      <ProjectAside project={selectedProject} />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
         </AnimatePresence>

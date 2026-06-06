@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import Plus from "@/app/components/Plus";
+import { Tab } from "@/app/view/MainPanel";
+import NavTabs from "@/app/components/NavTabs";
 
 const arrowVariants = {
   rest: { scale: 0.6, opacity: 0 },
@@ -25,13 +27,42 @@ const WORK_ICONS = [
   "/icons/work/Frame-11.svg",
 ];
 
+type GifType = "static" | "run" | "walk";
+type GifEntry = { src: string; type: GifType };
+
 const EMAIL = "codedbysahil@gmail.com";
 
-export default function LeftPanel({ isReturning = false }: { isReturning?: boolean }) {
+type Props = {
+  isReturning?: boolean;
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
+  showNames: boolean;
+  onShowNamesChange: (v: boolean) => void;
+  viewMode: "draw" | "code" | null;
+  onViewModeChange: (mode: "draw" | "code" | null) => void;
+};
+
+export default function LeftPanel({ isReturning = false, activeTab, onTabChange, showNames, onShowNamesChange, viewMode, onViewModeChange }: Props) {
+  const [gif, setGif] = useState<GifEntry | null>(null);
   const [copied, setCopied] = useState(false);
   const [hover, setHover] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [mounted, setMounted] = useState(false);
+  const [panelWidth, setPanelWidth] = useState(0);
+  const gifContainerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
+  useEffect(() => {
+    fetch("/gifs/config.json")
+      .then((r) => r.json())
+      .then((gifs: GifEntry[]) => {
+        setGif(gifs[Math.floor(Math.random() * gifs.length)]);
+      });
+    setMounted(true);
+    if (panelRef.current) {
+      setPanelWidth(panelRef.current.offsetWidth);
+    }
+  }, []);
   function copyEmail() {
     navigator.clipboard.writeText(EMAIL).then(() => {
       setCopied(true);
@@ -40,19 +71,38 @@ export default function LeftPanel({ isReturning = false }: { isReturning?: boole
   }
 
   return (
-    <aside className="w-full shrink-0 flex flex-col h-full relative">
+    <aside ref={panelRef} className="w-full shrink-0 flex flex-col h-full relative">
       <motion.div
         className="absolute top-0 right-0 w-px h-full bg-divider"
-        initial={!isReturning ? { clipPath: "inset(100% 0 0 0)" } : { clipPath: "inset(0% 0 0 0)" }}
-        animate={{ clipPath: "inset(0% 0 0 0)", transition: { duration: 1.2, ease: "easeOut", delay: 0.1 } }}
-        exit={{ clipPath: "inset(100% 0 0 0)", transition: { duration: 0.28, ease: "easeIn" } }}
+        initial={
+          !isReturning
+            ? { clipPath: "inset(100% 0 0 0)" }
+            : { clipPath: "inset(0% 0 0 0)" }
+        }
+        animate={{
+          clipPath: "inset(0% 0 0 0)",
+          transition: { duration: 1.2, ease: "easeOut", delay: 0.1 },
+        }}
+        exit={{
+          clipPath: "inset(100% 0 0 0)",
+          transition: { duration: 0.28, ease: "easeIn" },
+        }}
       />
       <motion.div
-        className="flex-1 flex flex-col p-[24px] relative"
+        className="flex-1 min-h-0 flex flex-col p-[24px] relative"
         initial={!isReturning ? { opacity: 0, x: -18 } : false}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.22, type: "spring", stiffness: 280, damping: 28 }}
-        exit={{ opacity: 0, x: -12, transition: { duration: 0.18, ease: "easeIn" } }}
+        transition={{
+          delay: 0.22,
+          type: "spring",
+          stiffness: 280,
+          damping: 28,
+        }}
+        exit={{
+          opacity: 0,
+          x: -12,
+          transition: { duration: 0.18, ease: "easeIn" },
+        }}
       >
         <div className=" flex justify-between mb-[12px]">
           <Plus />
@@ -78,35 +128,71 @@ export default function LeftPanel({ isReturning = false }: { isReturning?: boole
             </p>
           </div>
         </div>
-        <div className="flex justify-between mt-[12px]">
+        <div className="flex justify-between my-[12px]">
           <Plus />
           <Plus />
         </div>
-        <span
-          className="absolute bottom-0 right-0 w-[200px] h-[200px] bg-background-dark/60 rotate-90 pointer-events-none"
-            style={{
-              maskImage: "url('/icons/arrowLink.svg')",
-              maskSize: "contain",
-              maskRepeat: "no-repeat",
-              WebkitMaskImage: "url('/icons/arrowLink.svg')",
-              WebkitMaskSize: "contain",
-              WebkitMaskRepeat: "no-repeat",
-            }}
-          />
+        <NavTabs
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          showNames={showNames}
+          onShowNamesChange={onShowNamesChange}
+          viewMode={viewMode}
+          onViewModeChange={onViewModeChange}
+        />
+        <div className="flex justify-between mt-[24px]">
+          <Plus />
+          <Plus />
+        </div>
       </motion.div>
+      {mounted && gif && (
+        <div ref={gifContainerRef} className={`overflow-hidden w-full h-[120px] shrink-0${gif.type === "static" ? " flex items-end justify-end" : " flex items-end"}`}>
+          {gif.type === "static" ? (
+            <img src={gif.src} alt="random gif" className="max-h-full w-auto object-contain" />
+          ) : (
+            <motion.div
+              className="inline-block h-full"
+              animate={{ x: [-500, panelWidth + 500] }}
+              transition={{ duration: gif.type === "run" ? 10 : 15, repeat: Infinity, ease: "linear", repeatDelay: 10 }}
+            >
+              <img src={gif.src} alt="random gif" className="max-h-full w-auto object-contain" />
+            </motion.div>
+          )}
+        </div>
+      )}
 
       <motion.div
         className="w-full h-px bg-divider"
-        initial={!isReturning ? { clipPath: "inset(0 0% 0 100%)" } : { clipPath: "inset(0 0% 0 0%)" }}
-        animate={{ clipPath: "inset(0 0% 0 0%)", transition: { duration: 1.2, ease: "easeOut", delay: 0.15 } }}
-        exit={{ clipPath: "inset(0 0% 0 100%)", transition: { duration: 0.28, ease: "easeIn" } }}
+        initial={
+          !isReturning
+            ? { clipPath: "inset(0 0% 0 100%)" }
+            : { clipPath: "inset(0 0% 0 0%)" }
+        }
+        animate={{
+          clipPath: "inset(0 0% 0 0%)",
+          transition: { duration: 1.2, ease: "easeOut", delay: 0.15 },
+        }}
+        exit={{
+          clipPath: "inset(0 0% 0 100%)",
+          transition: { duration: 0.28, ease: "easeIn" },
+        }}
       />
+
       <motion.div
-        className="py-[24px]"
+        className="shrink-0 py-[24px]"
         initial={!isReturning ? { opacity: 0, y: 14 } : false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.42, type: "spring", stiffness: 280, damping: 28 }}
-        exit={{ opacity: 0, y: 8, transition: { duration: 0.18, ease: "easeIn" } }}
+        transition={{
+          delay: 0.42,
+          type: "spring",
+          stiffness: 280,
+          damping: 28,
+        }}
+        exit={{
+          opacity: 0,
+          y: 8,
+          transition: { duration: 0.18, ease: "easeIn" },
+        }}
       >
         <div className="flex items-center justify-between px-[24px] pb-[24px]">
           <Plus />
@@ -117,7 +203,7 @@ export default function LeftPanel({ isReturning = false }: { isReturning?: boole
             onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
             className="uppercase text-[12px] text-text-links font-inter font-light leading-none tracking-[0.08em] cursor-none hover:text-text-primary transition-colors"
           >
-            {copied ? "copied to clipboard" : "codedbysahil@gmail.com"}
+             codedbysahil@gmail.com
           </button>
           <Plus />
         </div>
