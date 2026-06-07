@@ -188,3 +188,13 @@ export const projects: Project[] = [
     year: 2025,
   },
 ];
+
+export function getUnique(...tags: string[]) {
+  const seen = new Set<string>();
+  return projects.filter((p) => {
+    if (!tags.every((t) => p.tags.includes(t))) return false;
+    if (seen.has(p.image)) return false;
+    seen.add(p.image);
+    return true;
+  });
+}

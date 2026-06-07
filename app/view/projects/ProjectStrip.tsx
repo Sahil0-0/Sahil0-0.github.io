@@ -6,16 +6,12 @@ import { motion, AnimatePresence } from "motion/react";
 import { projects, Project } from "@/app/config/projects";
 import CornerBrackets from "@/app/components/CornerBrackets";
 import ViewModeToggle from "@/app/components/ViewModeToggle";
+import { VIEW_MODE_TAG } from "@/app/config/constants";
 
 type Props = {
   selected: Project;
   onSelect: (project: Project) => void;
   onClose: () => void;
-};
-
-const VIEW_MODE_TAG: Record<"draw" | "code", string> = {
-  draw: "design",
-  code: "code",
 };
 
 export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
@@ -61,7 +57,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
         exit={{ clipPath: "inset(0 100% 0 0)", transition: { duration: 0.12, ease: "easeIn" } }}
       />
 
-      <div className="flex items-center gap-[8px] p-[32px] shrink-0 relative bg-background-dark">
+      <div className="flex items-center gap-[8px] p-[32px] shrink-0 relative bg-subtitle border-bottom border-divider">
         <motion.button
           initial="rest"
           whileHover="hover"
@@ -76,12 +72,12 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
           <motion.span
             variants={{ rest: { rotate: 0 }, hover: { rotate: 45 } }}
             transition={{ type: "spring", stiffness: 380, damping: 22 }}
-            className="absolute w-[40px] h-[4px] bg-background"
+            className="absolute w-[40px] h-[4px] bg-background-dark"
           />
           <motion.span
             variants={{ rest: { rotate: 0 }, hover: { rotate: -45 } }}
             transition={{ type: "spring", stiffness: 380, damping: 22 }}
-            className="absolute w-[40px] h-[4px] bg-background"
+            className="absolute w-[40px] h-[4px] bg-background-dark"
           />
         </motion.button>
         <motion.div
@@ -94,7 +90,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
 
       <div
         ref={scrollRef}
-        className="flex-1 overflow-x-auto no-scrollbar flex items-center px-[24px] pt-[12px] pb-[18px]"
+        className="flex-1 overflow-x-auto no-scrollbar flex items-center px-[24px] pt-[12px] pb-[18px] pr-[120px]"
       >
         <AnimatePresence mode="wait">
           <motion.div

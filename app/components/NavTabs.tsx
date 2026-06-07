@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, LayoutGroup, AnimatePresence } from "motion/react";
-import { TABS, Tab, TAB_COUNTS } from "@/app/view/MainPanel";
+import { TABS, Tab, TAB_COUNTS } from "@/app/config/constants";
 import ViewModeToggle from "@/app/components/ViewModeToggle";
+import MaskIcon from "@/app/components/MaskIcon";
 
 type Props = {
   activeTab: Tab;
@@ -79,19 +80,9 @@ export default function NavTabs({ activeTab, onTabChange, showNames, onShowNames
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                className=" flex items-center justify-center text-text-links hover:text-text-primary transition-colors cursor-pointer"
+                className="flex items-center justify-center text-text-links hover:text-text-primary transition-colors cursor-pointer"
               >
-                <span
-                  className="bg-current"
-                  style={{
-                    maskImage: "url('/icons/crossicon.svg')",
-                    maskSize: "contain",
-                    maskRepeat: "no-repeat",
-                    WebkitMaskImage: "url('/icons/crossicon.svg')",
-                    WebkitMaskSize: "contain",
-                    WebkitMaskRepeat: "no-repeat",
-                  }}
-                />
+                <MaskIcon src="/icons/crossicon.svg" />
               </motion.button>
             )}
           </AnimatePresence>

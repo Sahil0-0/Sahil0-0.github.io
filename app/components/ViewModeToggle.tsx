@@ -1,5 +1,7 @@
 "use client";
 
+import MaskIcon from "@/app/components/MaskIcon";
+
 type Props = {
   viewMode: "draw" | "code" | null;
   onViewModeChange: (mode: "draw" | "code" | null) => void;
@@ -22,17 +24,7 @@ export default function ViewModeToggle({ viewMode, onViewModeChange, variant = "
               isStrip ? "w-[30px] h-[30px]" : "py-[8px] px-[10px]"
             } ${isActive ? "bg-background text-text-primary" : "text-text-links hover:text-text-primary"}`}
           >
-            <span
-              className="w-[16px] h-[16px] bg-current transition-colors"
-              style={{
-                maskImage: `url('/icons/${iconName}Icon.svg')`,
-                maskSize: "contain",
-                maskRepeat: "no-repeat",
-                WebkitMaskImage: `url('/icons/${iconName}Icon.svg')`,
-                WebkitMaskSize: "contain",
-                WebkitMaskRepeat: "no-repeat",
-              }}
-            />
+            <MaskIcon src={`/icons/${iconName}Icon.svg`} className="w-[16px] h-[16px] transition-colors" />
           </button>
         );
       })}

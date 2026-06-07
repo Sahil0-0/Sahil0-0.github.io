@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import LeftPanel from "@/app/view/LeftPanel";
-import MainPanel, { Tab, TABS } from "@/app/view/MainPanel";
+import MainPanel from "@/app/view/MainPanel";
+import { Tab, TABS } from "@/app/config/constants";
 import ProjectStrip from "@/app/view/projects/ProjectStrip";
 import ProjectMain from "@/app/view/projects/ProjectMain";
 import ProjectAside from "@/app/view/projects/ProjectAside";
@@ -108,8 +109,6 @@ export default function Home() {
               <MainPanel
                 isReturning={isReturning.current}
                 activeTab={activeTab}
-                onTabChange={setActiveTab}
-                selectedProject={selectedProject}
                 onProjectSelect={setSelectedProject}
                 showNames={showNames}
                 viewMode={viewMode}
@@ -133,7 +132,7 @@ export default function Home() {
                     key="art-view"
                     className="w-full h-full"
                     initial={{ x: "100%" }}
-                    animate={{ x: 0, transition: { type: "spring", stiffness: 340, damping: 32 } }}
+                    animate={{ x: 0, transition: { type: "spring", stiffness: 340, damping: 32, delay: 0.6 } }}
                     exit={{ x: "-100%", transition: { duration: 0.28, ease: "easeIn" } }}
                   >
                     <ProjectMain project={selectedProject} />

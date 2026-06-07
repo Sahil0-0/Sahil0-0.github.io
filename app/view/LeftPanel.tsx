@@ -4,13 +4,26 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import Plus from "@/app/components/Plus";
-import { Tab } from "@/app/view/MainPanel";
+import { Tab } from "@/app/config/constants";
 import NavTabs from "@/app/components/NavTabs";
+import MaskIcon from "@/app/components/MaskIcon";
 
 const arrowVariants = {
   rest: { scale: 0.6, opacity: 0 },
   hover: { scale: 1, opacity: 1 },
 };
+
+function ScrambleText({
+  text,
+  className,
+}: {
+  text: string;
+  delayMs?: number;
+  durationMs?: number;
+  className?: string;
+}) {
+  return <span className={className}>{text}</span>;
+}
 
 const WORK_ICONS = [
   "/icons/work/Frame.svg",
@@ -25,6 +38,12 @@ const WORK_ICONS = [
   "/icons/work/Frame-9.svg",
   "/icons/work/Frame-10.svg",
   "/icons/work/Frame-11.svg",
+];
+
+const LINKS = [
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/codedbysahil", external: true },
+  { label: "GitHub", href: "https://github.com/Sahil0-0", external: true },
+  { label: "Resume", href: "/resume.pdf", external: false },
 ];
 
 type GifType = "static" | "run" | "walk";
@@ -42,7 +61,15 @@ type Props = {
   onViewModeChange: (mode: "draw" | "code" | null) => void;
 };
 
-export default function LeftPanel({ isReturning = false, activeTab, onTabChange, showNames, onShowNamesChange, viewMode, onViewModeChange }: Props) {
+export default function LeftPanel({
+  isReturning = false,
+  activeTab,
+  onTabChange,
+  showNames,
+  onShowNamesChange,
+  viewMode,
+  onViewModeChange,
+}: Props) {
   const [gif, setGif] = useState<GifEntry | null>(null);
   const [copied, setCopied] = useState(false);
   const [hover, setHover] = useState(false);
@@ -63,6 +90,7 @@ export default function LeftPanel({ isReturning = false, activeTab, onTabChange,
       setPanelWidth(panelRef.current.offsetWidth);
     }
   }, []);
+
   function copyEmail() {
     navigator.clipboard.writeText(EMAIL).then(() => {
       setCopied(true);
@@ -71,7 +99,10 @@ export default function LeftPanel({ isReturning = false, activeTab, onTabChange,
   }
 
   return (
-    <aside ref={panelRef} className="w-full shrink-0 flex flex-col h-full relative">
+    <aside
+      ref={panelRef}
+      className="w-full shrink-0 flex flex-col h-full relative"
+    >
       <motion.div
         className="absolute top-0 right-0 w-px h-full bg-divider"
         initial={
@@ -104,11 +135,11 @@ export default function LeftPanel({ isReturning = false, activeTab, onTabChange,
           transition: { duration: 0.18, ease: "easeIn" },
         }}
       >
-        <div className=" flex justify-between mb-[12px]">
+        <div className="flex justify-between mb-[12px]">
           <Plus />
           <Plus />
         </div>
-        <div className=" flex items-center justify-center flex-row gap-[24px] px-[24px]">
+        <div className="flex items-center justify-center flex-row gap-[24px] px-[24px]">
           <Image
             src="/images/profileImage.png"
             alt="Sahil Singh"
@@ -118,17 +149,25 @@ export default function LeftPanel({ isReturning = false, activeTab, onTabChange,
           />
           <div className="flex flex-col items-start min-w-0">
             <p className="font-google-sans-flex font-medium text-[clamp(18px,2.2vw,32px)] leading-none tracking-[-0.03em] text-text-primary">
-              Sahil Singh
+              <ScrambleText
+                text="Sahil Singh"
+                delayMs={300}
+                durationMs={1100}
+              />
             </p>
             <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[clamp(8px,0.9vw,12px)] mt-[24px]">
-              Developer
+              <ScrambleText text="Developer" delayMs={600} durationMs={800} />
             </p>
             <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[clamp(8px,0.9vw,12px)] mt-[12px]">
-              Design Engineer
+              <ScrambleText
+                text="Design Engineer"
+                delayMs={850}
+                durationMs={800}
+              />
             </p>
           </div>
         </div>
-        <div className="flex justify-between my-[12px]">
+        <div className="flex justify-between my-[18px]">
           <Plus />
           <Plus />
         </div>
@@ -142,20 +181,41 @@ export default function LeftPanel({ isReturning = false, activeTab, onTabChange,
         />
         <div className="flex justify-between mt-[24px]">
           <Plus />
+          <div className="flex items-center bg-divider/10 px-[16px] py-[10px] rounded-full">
+            <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[clamp(8px,0.9vw,12px)]">
+              Available for work
+            </p>
+          </div>
           <Plus />
         </div>
       </motion.div>
       {mounted && gif && (
-        <div ref={gifContainerRef} className={`overflow-hidden w-full h-[120px] shrink-0${gif.type === "static" ? " flex items-end justify-end" : " flex items-end"}`}>
+        <div
+          ref={gifContainerRef}
+          className={`overflow-hidden w-full h-[120px] shrink-0${gif.type === "static" ? " flex items-end justify-end" : " flex items-end"}`}
+        >
           {gif.type === "static" ? (
-            <img src={gif.src} alt="random gif" className="max-h-full w-auto object-contain" />
+            <img
+              src={gif.src}
+              alt="random gif"
+              className="max-h-full w-auto object-contain"
+            />
           ) : (
             <motion.div
               className="inline-block h-full"
               animate={{ x: [-500, panelWidth + 500] }}
-              transition={{ duration: gif.type === "run" ? 10 : 15, repeat: Infinity, ease: "linear", repeatDelay: 10 }}
+              transition={{
+                duration: gif.type === "run" ? 10 : 15,
+                repeat: Infinity,
+                ease: "linear",
+                repeatDelay: 10,
+              }}
             >
-              <img src={gif.src} alt="random gif" className="max-h-full w-auto object-contain" />
+              <img
+                src={gif.src}
+                alt="random gif"
+                className="max-h-full w-auto object-contain"
+              />
             </motion.div>
           )}
         </div>
@@ -203,7 +263,7 @@ export default function LeftPanel({ isReturning = false, activeTab, onTabChange,
             onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
             className="uppercase text-[12px] text-text-links font-inter font-light leading-none tracking-[0.08em] cursor-none hover:text-text-primary transition-colors"
           >
-             codedbysahil@gmail.com
+            {EMAIL}
           </button>
           <Plus />
         </div>
@@ -214,17 +274,10 @@ export default function LeftPanel({ isReturning = false, activeTab, onTabChange,
             style={{ animation: "marquee 20s linear infinite" }}
           >
             {[...WORK_ICONS, ...WORK_ICONS].map((src, i) => (
-              <span
+              <MaskIcon
                 key={i}
-                className="w-[24px] h-[24px] shrink-0 mr-[32px] inline-block bg-current"
-                style={{
-                  maskImage: `url('${src}')`,
-                  maskSize: "contain",
-                  maskRepeat: "no-repeat",
-                  WebkitMaskImage: `url('${src}')`,
-                  WebkitMaskSize: "contain",
-                  WebkitMaskRepeat: "no-repeat",
-                }}
+                src={src}
+                className="w-[24px] h-[24px] shrink-0 mr-[32px] inline-block"
               />
             ))}
           </div>
@@ -232,58 +285,25 @@ export default function LeftPanel({ isReturning = false, activeTab, onTabChange,
 
         <div className="uppercase flex items-center justify-between px-[24px] pt-[18px]">
           <Plus />
-          <motion.a
-            href="https://www.linkedin.com/in/codedbysahil"
-            target="_blank"
-            rel="noopener noreferrer"
-            initial="rest"
-            whileHover="hover"
-            className="inline-flex items-start gap-[2px] text-[12px] tracking-[0.08em] text-text-links hover:text-text-primary font-inter font-light leading-none cursor-pointer transition-colors"
-          >
-            LinkedIn
-            <motion.span
-              variants={arrowVariants}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="-mt-[2px]"
+          {LINKS.map(({ label, href, external }) => (
+            <motion.a
+              key={label}
+              href={href}
+              {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              initial="rest"
+              whileHover="hover"
+              className="inline-flex items-start gap-[2px] text-[12px] tracking-[0.08em] text-text-links hover:text-text-primary font-inter font-light leading-none cursor-pointer transition-colors"
             >
-              <Image src="/icons/arrowLink.svg" alt="" width={10} height={10} />
-            </motion.span>
-          </motion.a>
-
-          <motion.a
-            href="https://github.com/Sahil0-0"
-            target="_blank"
-            rel="noopener noreferrer"
-            initial="rest"
-            whileHover="hover"
-            className="inline-flex items-start gap-[2px] text-[12px] tracking-[0.08em] text-text-links hover:text-text-primary font-inter font-light leading-none cursor-pointer transition-colors"
-          >
-            GitHub
-            <motion.span
-              variants={arrowVariants}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="-mt-[2px]"
-            >
-              <Image src="/icons/arrowLink.svg" alt="" width={10} height={10} />
-            </motion.span>
-          </motion.a>
-
-          <motion.a
-            href="/resume.pdf"
-            initial="rest"
-            whileHover="hover"
-            className="inline-flex items-start gap-[2px] text-[12px] text-text-links hover:text-text-primary font-inter font-light leading-none tracking-[0.08em] cursor-pointer transition-colors"
-          >
-            Resume
-            <motion.span
-              variants={arrowVariants}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="-mt-[2px]"
-            >
-              <Image src="/icons/arrowLink.svg" alt="" width={10} height={10} />
-            </motion.span>
-          </motion.a>
-
+              {label}
+              <motion.span
+                variants={arrowVariants}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                className="-mt-[2px]"
+              >
+                <Image src="/icons/arrowLink.svg" alt="" width={10} height={10} />
+              </motion.span>
+            </motion.a>
+          ))}
           <Plus />
         </div>
       </motion.div>
