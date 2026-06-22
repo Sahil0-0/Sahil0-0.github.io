@@ -10,6 +10,8 @@ import ProjectMain from "@/app/view/projects/ProjectMain";
 import ProjectAside from "@/app/view/projects/ProjectAside";
 import { Project } from "@/app/config/projects";
 
+const SHOW_DEV_BANNER = true;
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>(TABS[0]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -56,6 +58,11 @@ export default function Home() {
 
   return (
     <div className="h-screen overflow-hidden flex flex-col relative">
+      {SHOW_DEV_BANNER && (
+        <div className="shrink-0 bg-divider/15 text-text-su text-center text-xs font-semibold tracking-widest uppercase py-1.5 px-4 border-b border-divider">
+          Development under progress
+        </div>
+      )}
       <AnimatePresence>
         {(stripMounted && selectedProject) && (
           <ProjectStrip
