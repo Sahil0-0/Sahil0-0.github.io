@@ -114,9 +114,8 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
                         key={project.image}
                         initial={{ scale: 0.7, opacity: 0 }}
                         animate={{ scale: 1, opacity: isSelected ? 1 : 0.5, transition: { type: "spring", stiffness: 600, damping: 24, delay: i * 0.03 } }}
-                        whileHover={!isSelected ? { opacity: 0.75 } : {}}
                         onClick={() => onSelect(project)}
-                        className="relative shrink-0 w-[70px] h-[70px] cursor-pointer"
+                        className="relative shrink-0 w-[70px] h-[70px] cursor-pointer group"
                       >
                         <AnimatePresence>
                           {isSelected && (
@@ -137,7 +136,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
                             alt={project.name}
                             fill
                             priority
-                            className="object-cover"
+                            className={`object-cover transition-[filter] duration-300 ${isSelected ? "" : "grayscale group-hover:grayscale-0"}`}
                           />
                         </div>
                       </motion.div>
@@ -148,11 +147,12 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
             ))}
           </motion.div>
         </AnimatePresence>
-      </div>
-
-      <div className="absolute right-[24px] bottom-[14px] z-10">
+        <div className="absolute right-[24px] bottom-[14px] z-10">
         <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} variant="strip" />
       </div>
+      </div>
+
+      
     </motion.div>
   );
 }

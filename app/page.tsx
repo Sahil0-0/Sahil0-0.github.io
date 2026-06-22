@@ -18,20 +18,40 @@ export default function Home() {
   const [stripMounted, setStripMounted] = useState(false);
   const stripTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const isReturning = useRef(false);
+  const hasHistoryEntry = useRef(false);
 
   useEffect(() => {
     if (selectedProject) {
       stripTimer.current = setTimeout(() => setStripMounted(true), 490);
+      if (!hasHistoryEntry.current) {
+        window.history.pushState({ projectOpen: true }, "");
+        hasHistoryEntry.current = true;
+      }
     } else {
       clearTimeout(stripTimer.current);
       setStripMounted(false);
+      hasHistoryEntry.current = false;
     }
     return () => clearTimeout(stripTimer.current);
   }, [selectedProject]);
 
+  useEffect(() => {
+    function onPopState() {
+      isReturning.current = true;
+      setSelectedProject(null);
+      hasHistoryEntry.current = false;
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   function handleClose() {
-    isReturning.current = true;
-    setSelectedProject(null);
+    if (hasHistoryEntry.current) {
+      window.history.back();
+    } else {
+      isReturning.current = true;
+      setSelectedProject(null);
+    }
   }
 
   return (

@@ -70,6 +70,7 @@ export default function LeftPanel({
   viewMode,
   onViewModeChange,
 }: Props) {
+  const [allGifs, setAllGifs] = useState<GifEntry[]>([]);
   const [gif, setGif] = useState<GifEntry | null>(null);
   const [copied, setCopied] = useState(false);
   const [hover, setHover] = useState(false);
@@ -83,6 +84,7 @@ export default function LeftPanel({
     fetch("/gifs/config.json")
       .then((r) => r.json())
       .then((gifs: GifEntry[]) => {
+        setAllGifs(gifs);
         setGif(gifs[Math.floor(Math.random() * gifs.length)]);
       });
     setMounted(true);
@@ -90,6 +92,20 @@ export default function LeftPanel({
       setPanelWidth(panelRef.current.offsetWidth);
     }
   }, []);
+
+  useEffect(() => {
+    if (!gif || allGifs.length === 0) return;
+    if (gif.type !== "run" && gif.type !== "walk") return;
+
+    const duration = gif.type === "run" ? 10 : 15;
+    const repeatDelay = 3;
+    const timer = setTimeout(() => {
+      const movingGifs = allGifs.filter((g) => g.type === "run" || g.type === "walk");
+      setGif(movingGifs[Math.floor(Math.random() * movingGifs.length)]);
+    }, (duration + repeatDelay) * 1000);
+
+    return () => clearTimeout(timer);
+  }, [gif, allGifs]);
 
   function copyEmail() {
     navigator.clipboard.writeText(EMAIL).then(() => {
@@ -192,7 +208,7 @@ export default function LeftPanel({
       {mounted && gif && (
         <div
           ref={gifContainerRef}
-          className={`overflow-hidden w-full h-[120px] shrink-0${gif.type === "static" ? " flex items-end justify-end" : " flex items-end"}`}
+          className={`overflow-hidden w-full h-[100px] shrink-0${gif.type === "static" ? " flex items-end justify-end" : " flex items-end"}`}
         >
           {gif.type === "static" ? (
             <img
@@ -202,13 +218,14 @@ export default function LeftPanel({
             />
           ) : (
             <motion.div
+              key={gif.src}
               className="inline-block h-full"
-              animate={{ x: [-500, panelWidth + 500] }}
+              animate={{ x: [-250, panelWidth + 250] }}
               transition={{
                 duration: gif.type === "run" ? 10 : 15,
                 repeat: Infinity,
                 ease: "linear",
-                repeatDelay: 10,
+                repeatDelay: 3,
               }}
             >
               <img

@@ -1,7 +1,13 @@
 [
-  { "src": "/gifs/goku-ssj3.gif", "type": "static" },
   { "src": "/gifs/pikachu-running.gif", "type": "run" },
   { "src": "/gifs/snorlax-sleeping.gif", "type": "static" },
   { "src": "/gifs/sonic-running.gif", "type": "run" },
-  { "src": "/gifs/toothless-guitar.gif", "type": "static" }
+  { "src": "/gifs/toothless-guitar.gif", "type": "static" },
+  { "src": "/gifs/charizard-flyingif.gif", "type": "run" },
+  { "src": "/gifs/contra-run.gif", "type": "run" },
+  { "src": "/gifs/cowboy-smoking.gif", "type": "static" },
+  { "src": "/gifs/goku-running.gif", "type": "run" },
+  { "src": "/gifs/goku-transform.gif", "type": "static" },
+  { "src": "/gifs/jojo-walking.gif", "type": "walk" },
+  { "src": "/gifs/naruto-bleach-fight.gif", "type": "static" }
 ]
