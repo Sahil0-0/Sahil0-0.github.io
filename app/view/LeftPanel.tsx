@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import Plus from "@/app/components/Plus";
-import { Tab } from "@/app/config/constants";
+import { Tab, EMAIL, LINKS, WORK_ICONS } from "@/app/config/constants";
 import NavTabs from "@/app/components/NavTabs";
 import MaskIcon from "@/app/components/MaskIcon";
 
@@ -25,31 +25,8 @@ function ScrambleText({
   return <span className={className}>{text}</span>;
 }
 
-const WORK_ICONS = [
-  "/icons/work/Frame.svg",
-  "/icons/work/Frame-1.svg",
-  "/icons/work/Frame-2.svg",
-  "/icons/work/Frame-3.svg",
-  "/icons/work/Frame-4.svg",
-  "/icons/work/Frame-5.svg",
-  "/icons/work/Frame-6.svg",
-  "/icons/work/Frame-7.svg",
-  "/icons/work/Frame-8.svg",
-  "/icons/work/Frame-9.svg",
-  "/icons/work/Frame-10.svg",
-  "/icons/work/Frame-11.svg",
-];
-
-const LINKS = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/codedbysahil", external: true },
-  { label: "GitHub", href: "https://github.com/Sahil0-0", external: true },
-  { label: "Resume", href: "/resume.pdf", external: false },
-];
-
 type GifType = "static" | "run" | "walk";
 type GifEntry = { src: string; type: GifType };
-
-const EMAIL = "codedbysahil@gmail.com";
 
 type Props = {
   isReturning?: boolean;
@@ -271,7 +248,7 @@ export default function LeftPanel({
           transition: { duration: 0.18, ease: "easeIn" },
         }}
       >
-        <div className="flex items-center justify-between px-[24px] pb-[24px]">
+        <div className="lp-edge-row flex items-center justify-between px-[24px] pb-[24px]">
           <Plus />
           <button
             onClick={copyEmail}
@@ -300,7 +277,7 @@ export default function LeftPanel({
           </div>
         </div>
 
-        <div className="uppercase flex items-center justify-between px-[24px] pt-[18px]">
+        <div className="lp-edge-row uppercase flex items-center justify-between px-[24px] pt-[18px]">
           <Plus />
           {LINKS.map(({ label, href, external }) => (
             <motion.a

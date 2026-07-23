@@ -12,6 +12,9 @@ import { Project } from "@/app/config/projects";
 import useIsMobile from "@/app/hooks/useIsMobile";
 import useOrientationLock from "@/app/hooks/useOrientationLock";
 import ForcedOrientation from "@/app/components/ForcedOrientation";
+import MobileTabHeader from "@/app/components/MobileTabHeader";
+import MobileFooter from "@/app/components/MobileFooter";
+import useDeviceClass from "@/app/hooks/useDeviceClass";
 
 const SHOW_DEV_BANNER = true;
 
@@ -23,6 +26,7 @@ export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobilePane, setMobilePane] = useState<"main" | "aside">("main");
   const isMobile = useIsMobile();
+  const isPhone = useDeviceClass() === "phone";
   const [stripMounted, setStripMounted] = useState(false);
 
   useOrientationLock();
@@ -85,6 +89,8 @@ export default function Home() {
       </AnimatePresence>
 
 
+      {isPhone && !selectedProject && <MobileFooter />}
+
       <div className="flex-1 min-h-0 flex relative">
         {!isMobile && (
           <AnimatePresence>
@@ -125,7 +131,7 @@ export default function Home() {
           </AnimatePresence>
         )}
 
-        {isMobile && !selectedProject && (
+        {isMobile && !isPhone && !selectedProject && (
           <>
             <button
               aria-label="Open menu"
@@ -290,6 +296,10 @@ export default function Home() {
           )}
         </AnimatePresence>
       </div>
+
+      {isPhone && !selectedProject && (
+        <MobileTabHeader activeTab={activeTab} onTabChange={setActiveTab} />
+      )}
       </div>
     </ForcedOrientation>
   );

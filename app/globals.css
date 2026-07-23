@@ -52,6 +52,21 @@ body {
   min-height: 100%;
 }
 
+/* On tablets the sidebar is ~25% of a narrow viewport (~256px), which crowds the
+   email and links rows against their Plus markers. Reclaim the horizontal space
+   there only — phones and desktop keep the 24px padding. */
+[data-device="tablet"] .lp-edge-row {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* Phones and tablets close a project with the back gesture/button, so the strip's
+   close (X) block is dropped entirely there. Desktop keeps it. */
+[data-device="phone"] .strip-close,
+[data-device="tablet"] .strip-close {
+  display: none;
+}
+
 @media (max-width: 1023.98px) {
   .project-grid {
     grid-template-columns: repeat(2, 1fr);

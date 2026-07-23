@@ -57,7 +57,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
         exit={{ clipPath: "inset(0 100% 0 0)", transition: { duration: 0.12, ease: "easeIn" } }}
       />
 
-      <div className="flex items-center gap-[8px] p-[32px] max-lg:p-[16px] shrink-0 relative bg-subtitle border-bottom border-divider">
+      <div className="strip-close flex items-center gap-[8px] p-[32px] max-lg:p-[16px] shrink-0 relative bg-subtitle border-bottom border-divider">
         <motion.button
           initial="rest"
           whileHover="hover"

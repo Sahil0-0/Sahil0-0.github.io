@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { getDeviceClass, type DeviceClass } from "@/app/hooks/useDeviceClass";
 
 type Orientation = "portrait" | "landscape";
 
-/** Required orientation by device class (shorter screen edge, orientation-independent). */
-function requiredOrientation(): Orientation | null {
-  const shortEdge = Math.min(window.screen.width, window.screen.height);
-  if (shortEdge <= 600) return "portrait"; // phone
-  if (shortEdge <= 1024) return "landscape"; // tablet
-  return null; // desktop — unrestricted
-}
+const REQUIRED_ORIENTATION: Record<DeviceClass, Orientation | null> = {
+  phone: "portrait",
+  tablet: "landscape",
+  desktop: null, // unrestricted
+};
 
 /**
  * Forces the app into a fixed orientation by rotating the whole UI 90° when the
@@ -23,7 +22,12 @@ export default function ForcedOrientation({ children }: { children: ReactNode })
 
   useEffect(() => {
     const update = () => {
-      const need = requiredOrientation();
+      const deviceClass = getDeviceClass();
+      // Published so CSS can target a device class without guessing from viewport
+      // width, which is unreliable once the UI is force-rotated.
+      document.documentElement.dataset.device = deviceClass;
+
+      const need = REQUIRED_ORIENTATION[deviceClass];
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const current: Orientation = vh >= vw ? "portrait" : "landscape";

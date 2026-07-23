@@ -28,7 +28,7 @@ export default function MainPanel({ activeTab, onProjectSelect, isReturning = fa
   const baseDelay = (!isReturning && isInitialMount.current) ? 0.62 : 0;
 
   return (
-    <main className="flex-1 min-w-0 h-full overflow-y-auto no-scrollbar">
+    <main className="flex-1 min-w-0 h-full overflow-y-auto no-scrollbar isolate" style={{ transform: "translateZ(0)" }}>
       <div className="project-grid">
         <AnimatePresence mode="popLayout">
         {filtered.map((project, i) => (
