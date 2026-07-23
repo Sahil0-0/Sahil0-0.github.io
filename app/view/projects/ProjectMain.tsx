@@ -22,6 +22,14 @@ export default function ProjectMain({ project }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef<{ startX: number; startY: number; ox: number; oy: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchRef = useRef<{ startDist: number; startZoom: number } | null>(null);
+
+  const pinchDistance = () => {
+    const pts = Array.from(pointersRef.current.values());
+    if (pts.length < 2) return 0;
+    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  };
 
   if (prevImageRef.current !== project.image) {
     const prevIdx = projects.findIndex((p) => p.image === prevImageRef.current);
@@ -55,6 +63,16 @@ export default function ProjectMain({ project }: Props) {
   }, [handleWheel, isArt]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointersRef.current.size === 2) {
+      // Second finger down: begin pinch-to-zoom, cancel any pan in progress.
+      dragRef.current = null;
+      setIsDragging(false);
+      pinchRef.current = { startDist: pinchDistance(), startZoom: zoom };
+      return;
+    }
+
     if (zoom <= 1) return;
     (e.target as Element).setPointerCapture(e.pointerId);
     dragRef.current = { startX: e.clientX, startY: e.clientY, ox: offset.x, oy: offset.y };
@@ -62,6 +80,23 @@ export default function ProjectMain({ project }: Props) {
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+
+    if (pinchRef.current && pointersRef.current.size >= 2) {
+      const dist = pinchDistance();
+      if (!dist || !pinchRef.current.startDist) return;
+      const next = Math.min(5, Math.max(1, pinchRef.current.startZoom * (dist / pinchRef.current.startDist)));
+      if (next <= 1.01) {
+        setOffset({ x: 0, y: 0 });
+        setZoom(1);
+      } else {
+        setZoom(next);
+      }
+      return;
+    }
+
     if (!dragRef.current) return;
     setOffset({
       x: dragRef.current.ox + (e.clientX - dragRef.current.startX),
@@ -69,7 +104,11 @@ export default function ProjectMain({ project }: Props) {
     });
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
+    pointersRef.current.delete(e.pointerId);
+    if (pointersRef.current.size < 2) {
+      pinchRef.current = null;
+    }
     dragRef.current = null;
     setIsDragging(false);
   };
@@ -84,7 +123,7 @@ export default function ProjectMain({ project }: Props) {
       <motion.div
         ref={containerRef}
         className="relative w-full h-full overflow-hidden select-none"
-        style={{ cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "default" }}
+        style={{ cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "default", touchAction: "none" }}
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         transition={{ type: "spring", stiffness: 340, damping: 32 }}
@@ -113,7 +152,7 @@ export default function ProjectMain({ project }: Props) {
               priority
             />
             <div className="absolute inset-0 bg-black/75" />
-            <div className="absolute inset-0 flex items-center justify-center p-[48px]">
+            <div className="absolute inset-0 flex items-center justify-center p-[48px] max-lg:p-[20px]">
               <div
                 className="relative w-full h-full"
                 style={{

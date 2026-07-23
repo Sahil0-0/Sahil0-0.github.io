@@ -57,7 +57,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
         exit={{ clipPath: "inset(0 100% 0 0)", transition: { duration: 0.12, ease: "easeIn" } }}
       />
 
-      <div className="flex items-center gap-[8px] p-[32px] shrink-0 relative bg-subtitle border-bottom border-divider">
+      <div className="flex items-center gap-[8px] p-[32px] max-lg:p-[16px] shrink-0 relative bg-subtitle border-bottom border-divider">
         <motion.button
           initial="rest"
           whileHover="hover"
@@ -90,7 +90,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
 
       <div
         ref={scrollRef}
-        className="flex-1 overflow-x-auto no-scrollbar flex items-center px-[24px] pt-[12px] pb-[18px] pr-[120px]"
+        className="flex-1 overflow-x-auto no-scrollbar flex items-center px-[24px] pt-[12px] pb-[18px] pr-[120px] max-lg:px-[14px] max-lg:pr-[64px]"
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -98,7 +98,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
             initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1, transition: { type: "spring", stiffness: 420, damping: 26 } }}
             exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.12, ease: "easeIn" } }}
-            className="flex items-center gap-[32px]"
+            className="flex items-center gap-[32px] max-lg:gap-[18px]"
           >
             {years.map((year) => (
               <div key={year} className="flex flex-col shrink-0 gap-[6px]">
@@ -147,7 +147,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
             ))}
           </motion.div>
         </AnimatePresence>
-        <div className="absolute right-[24px] bottom-[14px] z-10">
+        <div className="absolute right-[24px] bottom-[14px] max-lg:right-[10px] z-10">
         <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} variant="strip" />
       </div>
       </div>

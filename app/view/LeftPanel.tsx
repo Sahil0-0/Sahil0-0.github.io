@@ -155,7 +155,7 @@ export default function LeftPanel({
           <Plus />
           <Plus />
         </div>
-        <div className="flex items-center justify-center flex-row gap-[24px] px-[24px]">
+        <div className="flex items-center justify-center flex-row gap-[24px] px-[24px] max-lg:px-0">
           <Image
             src="/images/profileImage.png"
             alt="Sahil Singh"
@@ -278,7 +278,7 @@ export default function LeftPanel({
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
             onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-            className="uppercase text-[12px] text-text-links font-inter font-light leading-none tracking-[0.08em] cursor-none hover:text-text-primary transition-colors"
+            className="uppercase text-[12px] text-text-links font-inter font-light leading-none tracking-[0.08em] cursor-none max-lg:cursor-pointer max-lg:break-all hover:text-text-primary transition-colors"
           >
             {EMAIL}
           </button>
