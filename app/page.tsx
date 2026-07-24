@@ -18,6 +18,11 @@ import useDeviceClass from "@/app/hooks/useDeviceClass";
 
 const SHOW_DEV_BANNER = true;
 
+// How long to keep the main screen hidden after starting a back: long enough for
+// the strip to slide up and the project view to leave, so everything clears out
+// cleanly before the header slides in and the projects follow.
+const EXIT_MS = 340;
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>(TABS[0]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -28,14 +33,23 @@ export default function Home() {
   const isMobile = useIsMobile();
   const isPhone = useDeviceClass() === "phone";
   const [stripMounted, setStripMounted] = useState(false);
+  // Gates the main screen so it stays hidden while the project view slides out,
+  // then reveals it (header first, projects after) once the exit has finished.
+  const [mainVisible, setMainVisible] = useState(true);
 
   useOrientationLock();
   const stripTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const selectedProjectRef = useRef(selectedProject);
   const isReturning = useRef(false);
   const hasHistoryEntry = useRef(false);
 
+  useEffect(() => { selectedProjectRef.current = selectedProject; }, [selectedProject]);
+
   useEffect(() => {
     if (selectedProject) {
+      clearTimeout(closeTimer.current);
+      setMainVisible(true);
       setDrawerOpen(false);
       setMobilePane("main");
       stripTimer.current = setTimeout(() => setStripMounted(true), 490);
@@ -51,22 +65,42 @@ export default function Home() {
     return () => clearTimeout(stripTimer.current);
   }, [selectedProject]);
 
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  // Clear the "returning" flag once the back animations have settled. LeftPanel's
+  // onAnimationComplete only covers desktop, so this timer covers phone/tablet too
+  // (otherwise later tab switches would keep using the slower return timing).
   useEffect(() => {
-    function onPopState() {
-      isReturning.current = true;
-      setSelectedProject(null);
-      hasHistoryEntry.current = false;
-    }
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    if (selectedProject || !isReturning.current) return;
+    const t = setTimeout(() => { isReturning.current = false; }, 800);
+    return () => clearTimeout(t);
+  }, [selectedProject]);
+
+  // Back: slide everything out cleanly first — strip up + project view leaving —
+  // while the main screen stays hidden, then reveal it (header slides in, projects
+  // follow after their delay). Guard against a stray popstate when already on main.
+  function beginClose() {
+    if (!selectedProjectRef.current) return;
+    isReturning.current = true;
+    hasHistoryEntry.current = false;
+    setMainVisible(false);
+    setStripMounted(false);
+    setSelectedProject(null);
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setMainVisible(true), EXIT_MS);
+  }
+
+  useEffect(() => {
+    window.addEventListener("popstate", beginClose);
+    return () => window.removeEventListener("popstate", beginClose);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleClose() {
     if (hasHistoryEntry.current) {
       window.history.back();
     } else {
-      isReturning.current = true;  
-      setSelectedProject(null);
+      beginClose();
     }
   }
 
@@ -89,12 +123,20 @@ export default function Home() {
       </AnimatePresence>
 
 
-      {isPhone && !selectedProject && <MobileFooter />}
+      {isPhone && !selectedProject && mainVisible && (
+        <motion.div
+          initial={isReturning.current ? { y: "-100%", opacity: 0 } : false}
+          animate={{ y: 0, opacity: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
+          className="shrink-0"
+        >
+          <MobileFooter />
+        </motion.div>
+      )}
 
       <div className="flex-1 min-h-0 flex relative">
         {!isMobile && (
           <AnimatePresence>
-            {!selectedProject && (
+            {!selectedProject && mainVisible && (
               <motion.div
                 key="left-panel"
                 initial={isReturning.current ? { x: "-100%" } : false}
@@ -102,7 +144,7 @@ export default function Home() {
                   x: 0,
                   opacity: 1,
                   transition: {
-                    delay: isReturning.current ? 0.25 : 0,
+                    delay: 0,
                     type: "spring",
                     stiffness: 340,
                     damping: 32,
@@ -131,7 +173,7 @@ export default function Home() {
           </AnimatePresence>
         )}
 
-        {isMobile && !isPhone && !selectedProject && (
+        {isMobile && !isPhone && !selectedProject && mainVisible && (
           <>
             <button
               aria-label="Open menu"
@@ -179,21 +221,12 @@ export default function Home() {
         )}
 
         <AnimatePresence>
-          {!selectedProject && (
+          {!selectedProject && mainVisible && (
             <motion.div
               key="main-panel"
               className="flex-1 min-w-0 h-full"
-              initial={isReturning.current ? { y: "100%" } : false}
-              animate={{
-                y: 0,
-                opacity: 1,
-                transition: {
-                  delay: isReturning.current ? 0.25 : 0,
-                  type: "spring",
-                  stiffness: 340,
-                  damping: 32,
-                },
-              }}
+              initial={false}
+              animate={{ opacity: 1 }}
               exit={{
                 opacity: 0,
                 transition: { duration: 0.15, delay: 0.3 },
@@ -297,8 +330,14 @@ export default function Home() {
         </AnimatePresence>
       </div>
 
-      {isPhone && !selectedProject && (
-        <MobileTabHeader activeTab={activeTab} onTabChange={setActiveTab} />
+      {isPhone && !selectedProject && mainVisible && (
+        <motion.div
+          initial={isReturning.current ? { y: "100%", opacity: 0 } : false}
+          animate={{ y: 0, opacity: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
+          className="shrink-0"
+        >
+          <MobileTabHeader activeTab={activeTab} onTabChange={setActiveTab} />
+        </motion.div>
       )}
       </div>
     </ForcedOrientation>

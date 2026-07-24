@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { projects, Project } from "@/app/config/projects";
 import CornerBrackets from "@/app/components/CornerBrackets";
@@ -17,11 +17,16 @@ type Props = {
 export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLDivElement>(null);
+  const hasSlid = useRef(false);
   const [viewMode, setViewMode] = useState<"draw" | "code" | null>(null);
 
-  useEffect(() => {
-    selectedRef.current?.scrollIntoView({ behavior: "auto", block: "nearest", inline: "center" });
-  }, []);
+  // Slide the strip to center the selected thumbnail, but only once the strip
+  // has finished sliding into view — fired from the entrance's onAnimationComplete.
+  function slideToSelected() {
+    if (hasSlid.current) return;
+    hasSlid.current = true;
+    selectedRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }
 
   const filtered = viewMode
     ? projects.filter((p) => p.tags.includes(VIEW_MODE_TAG[viewMode]))
@@ -46,6 +51,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
         },
       }}
       exit={{ y: "-100%", transition: { duration: 0.18, ease: "easeIn", delay: 0.13 } }}
+      onAnimationComplete={slideToSelected}
       className="w-full bg-background flex items-stretch shrink-0 relative"
     >
       <motion.div

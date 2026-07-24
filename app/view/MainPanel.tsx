@@ -25,7 +25,16 @@ export default function MainPanel({ activeTab, onProjectSelect, isReturning = fa
     ? getUnique(TAB_TAG[activeTab], VIEW_MODE_TAG[viewMode])
     : getUnique(TAB_TAG[activeTab]);
 
-  const baseDelay = (!isReturning && isInitialMount.current) ? 0.62 : 0;
+  // Returning from a project: hold a short beat after the strip has slid out
+  // before the tiles pop back in, and let them ease in a touch slower. First
+  // page load keeps the longer intro delay; tab switches stay snappy.
+  // On return the header/top chrome slides in first; hold the tiles a bit longer
+  // so they follow it rather than coming in together.
+  const baseDelay = isReturning ? 0.4 : isInitialMount.current ? 0.62 : 0;
+  const enterDuration = isReturning ? 0.45 : 0.22;
+  const enterStagger = isReturning ? 0.03 : 0.02;
+  // Softer landing on the way back so the tiles settle rather than snap.
+  const enterEase = isReturning ? ([0.22, 1, 0.36, 1] as const) : "easeOut";
 
   return (
     <main className="flex-1 min-w-0 h-full overflow-y-auto no-scrollbar isolate" style={{ transform: "translateZ(0)" }}>
@@ -37,7 +46,7 @@ export default function MainPanel({ activeTab, onProjectSelect, isReturning = fa
             initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.15, ease: "easeIn", delay: i * 0.01 } }}
-            transition={{ duration: 0.22, ease: "easeOut", delay: baseDelay + i * 0.02 }}
+            transition={{ duration: enterDuration, ease: enterEase, delay: baseDelay + i * enterStagger }}
             className="overflow-hidden rounded-2xl group relative cursor-pointer"
             style={{ gridColumn: `span ${project.span ?? 1}` }}
             onClick={() => onProjectSelect(project)}
