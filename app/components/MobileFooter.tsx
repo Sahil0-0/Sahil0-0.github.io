@@ -61,7 +61,7 @@ export default function MobileFooter() {
         <button
           onClick={() => setExpanded((v) => !v)}
           aria-label={expanded ? "Collapse" : "Expand"}
-          className="absolute right-[14px] top-[4px] z-10 flex items-center justify-center w-[18px] h-[18px] text-text-links"
+          className="absolute right-[14px] top-[11px] z-10 flex items-center justify-center w-[18px] h-[18px] text-text-links"
         >
           <Chevron up={expanded} />
         </button>
@@ -71,8 +71,9 @@ export default function MobileFooter() {
           animate={{ height: expanded ? "auto" : 0 }}
           transition={collapsible}
           className="overflow-hidden"
+          style={{ willChange: "height" }}
         >
-          <div className="px-[16px] pt-[12px] pb-[10px]">
+          <div className="px-[16px] pt-[12px] pb-[10px]" style={{ transform: "translateZ(0)" }}>
             <div className="flex items-center justify-between px-[6px]">
               <div className="flex items-center gap-[12px]">
                 <Image
@@ -80,6 +81,7 @@ export default function MobileFooter() {
                   alt={PROFILE.name}
                   width={44}
                   height={44}
+                  priority
                   className="rounded-full shrink-0"
                 />
                 <p className="font-google-sans-flex font-medium text-[20px] leading-none tracking-[-0.03em] text-text-primary whitespace-nowrap">
@@ -127,8 +129,9 @@ export default function MobileFooter() {
           animate={{ height: expanded ? "auto" : 0 }}
           transition={collapsible}
           className="overflow-hidden"
+          style={{ willChange: "height" }}
         >
-          <div className="overflow-hidden py-[10px] w-full px-[16px]">
+          <div className="overflow-hidden py-[10px] w-full px-[16px]" style={{ transform: "translateZ(0)" }}>
             <div
               className="flex whitespace-nowrap w-max text-text-links"
               style={{ animation: "marquee 20s linear infinite" }}
@@ -143,7 +146,7 @@ export default function MobileFooter() {
             </div>
           </div>
 
-          <div className="uppercase flex items-center justify-between px-[16px] pt-[10px] pb-[16px]">
+          <div className="uppercase flex items-center justify-between px-[16px] pt-[10px] pb-[16px]" style={{ transform: "translateZ(0)" }}>
             <Plus size={7} />
             {LINKS.map(({ label, href, external }) => (
               <motion.a

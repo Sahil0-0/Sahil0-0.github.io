@@ -27,6 +27,7 @@ export default function MobileTabHeader({ activeTab, onTabChange }: Props) {
                   layoutId="tab-corners-mobile"
                   className="absolute inset-0 pointer-events-none"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  style={{ willChange: "transform" }}
                 >
                   <span className="absolute top-0 left-0 w-[6px] h-[6px] border-t border-l border-text-primary" />
                   <span className="absolute top-0 right-0 w-[6px] h-[6px] border-t border-r border-text-primary" />
