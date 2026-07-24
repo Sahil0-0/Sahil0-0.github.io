@@ -20,10 +20,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
   const [viewMode, setViewMode] = useState<"draw" | "code" | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      selectedRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    }, 600);
-    return () => clearTimeout(timer);
+    selectedRef.current?.scrollIntoView({ behavior: "auto", block: "nearest", inline: "center" });
   }, []);
 
   const filtered = viewMode

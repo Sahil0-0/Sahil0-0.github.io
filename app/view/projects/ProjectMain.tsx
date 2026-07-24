@@ -158,7 +158,6 @@ export default function ProjectMain({ project }: Props) {
                 style={{
                   transform: `scale(${zoom}) translate(${offset.x / zoom}px, ${offset.y / zoom}px)`,
                   transformOrigin: "center center",
-                  transition: isDragging ? "none" : "transform 0.06s ease-out",
                 }}
               >
                 <Image

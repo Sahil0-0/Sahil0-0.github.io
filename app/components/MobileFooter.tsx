@@ -53,7 +53,7 @@ export default function MobileFooter() {
     <div className="shrink-0 relative z-20 bg-background">
       {/* Reserves the collapsed mail-row height so the grid sits below it.
           No border here — the overlay panel's own border-b is the divider. */}
-      <div className="h-[26px]" />
+      <div className="h-[40px]" />
 
       <div className="absolute left-0 right-0 top-0 bg-background">
         <AnimatedDivider className="absolute bottom-0 left-0 right-0 z-10" />
@@ -90,7 +90,7 @@ export default function MobileFooter() {
                 {PROFILE.roles.map((role) => (
                   <p
                     key={role}
-                    className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[9px] whitespace-nowrap"
+                    className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[11px] whitespace-nowrap"
                   >
                     {role}
                   </p>
@@ -99,8 +99,8 @@ export default function MobileFooter() {
             </div>
             <div className="flex items-center justify-between mt-[12px]">
               <Plus size={7} />
-              <div className="flex items-center bg-divider/10 px-[12px] pt-[6px] pb-[10px] rounded-full">
-                <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[9px]">
+              <div className="flex items-center bg-divider/10 px-[12px] pt-[10px] pb-[10px] rounded-full">
+                <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[11px]">
                   Available for work
                 </p>
               </div>
@@ -110,11 +110,11 @@ export default function MobileFooter() {
           </div>
         </motion.div>
 
-        <div className={`flex items-center h-[26px] px-[16px] ${expanded ? "justify-between" : "justify-center"}`}>
+        <div className={`flex items-center h-[40px] px-[16px] ${expanded ? "justify-between" : "justify-center"}`}>
           {expanded && <Plus size={7} />}
           <button
             onClick={copyEmail}
-            className="uppercase text-[10px] text-text-links font-inter font-light leading-none tracking-[0.08em] transition-colors"
+            className="uppercase text-[12px] text-text-links font-inter font-light leading-none tracking-[0.08em] transition-colors"
           >
             {copied ? "Copied!" : EMAIL}
           </button>
@@ -152,7 +152,7 @@ export default function MobileFooter() {
                 {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 initial="rest"
                 whileHover="hover"
-                className="inline-flex items-start gap-[2px] text-[10px] tracking-[0.08em] text-text-links font-inter font-light leading-none transition-colors"
+                className="inline-flex items-start gap-[2px] text-[12px] tracking-[0.08em] text-text-links font-inter font-light leading-none transition-colors"
               >
                 {label}
                 <motion.span

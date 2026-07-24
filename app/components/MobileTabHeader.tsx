@@ -35,7 +35,7 @@ export default function MobileTabHeader({ activeTab, onTabChange }: Props) {
                 </motion.div>
               )}
               <span
-                className="text-[11px] uppercase tracking-[0.06em] font-urbanist font-medium whitespace-nowrap"
+                className="text-[13px] uppercase tracking-[0.06em] font-urbanist font-medium whitespace-nowrap"
                 style={{ color: isActive ? "var(--text-primary)" : "var(--text-links)" }}
               >
                 {tab}
