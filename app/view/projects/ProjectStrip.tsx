@@ -1,12 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { projects, Project } from "@/app/config/projects";
 import CornerBrackets from "@/app/components/CornerBrackets";
-import ViewModeToggle from "@/app/components/ViewModeToggle";
-import { VIEW_MODE_TAG } from "@/app/config/constants";
 
 type Props = {
   selected: Project;
@@ -18,7 +16,6 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLDivElement>(null);
   const hasSlid = useRef(false);
-  const [viewMode, setViewMode] = useState<"draw" | "code" | null>(null);
 
   // Slide the strip to center the selected thumbnail, but only once the strip
   // has finished sliding into view — fired from the entrance's onAnimationComplete.
@@ -28,11 +25,7 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
     selectedRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }
 
-  const filtered = viewMode
-    ? projects.filter((p) => p.tags.includes(VIEW_MODE_TAG[viewMode]))
-    : projects;
-
-  const byYear = filtered.reduce<Record<number, Project[]>>((acc, p) => {
+  const byYear = projects.reduce<Record<number, Project[]>>((acc, p) => {
     (acc[p.year] ??= []).push(p);
     return acc;
   }, {});
@@ -95,15 +88,12 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
         ref={scrollRef}
         className="flex-1 overflow-x-auto no-scrollbar flex items-center px-[24px] pt-[12px] pb-[18px] pr-[120px] max-lg:px-[14px] max-lg:pr-[64px]"
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={viewMode ?? "all"}
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1, transition: { type: "spring", stiffness: 420, damping: 26 } }}
-            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.12, ease: "easeIn" } }}
-            className="flex items-center gap-[32px] max-lg:gap-[18px]"
-          >
-            {years.map((year) => (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1, transition: { type: "spring", stiffness: 420, damping: 26 } }}
+          className="flex items-center gap-[32px] max-lg:gap-[18px]"
+        >
+          {years.map((year) => (
               <div key={year} className="flex flex-col shrink-0 gap-[6px]">
                 <span className="font-inter text-[12px] uppercase tracking-[0.1em] text-text-subtitle">
                   {year}
@@ -148,14 +138,8 @@ export default function ProjectStrip({ selected, onSelect, onClose }: Props) {
                 </div>
               </div>
             ))}
-          </motion.div>
-        </AnimatePresence>
-        <div className="absolute right-[24px] bottom-[14px] max-lg:right-[10px] z-10">
-        <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} variant="strip" />
+        </motion.div>
       </div>
-      </div>
-
-      
     </motion.div>
   );
 }

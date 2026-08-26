@@ -28,7 +28,7 @@ const googleSansFlex = localFont({
 
 export const metadata: Metadata = {
   title: "codedbysahil",
-  description: "Developer & designer — mobile, web, and product.",
+  description: "Design engineer — mobile, web, and product.",
   icons: {
     icon: "/images/favIcon.jpeg",
   },

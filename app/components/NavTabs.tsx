@@ -1,22 +1,16 @@
 "use client";
 
-import { motion, LayoutGroup, AnimatePresence } from "motion/react";
-import { TABS, Tab, TAB_COUNTS } from "@/app/config/constants";
-import ViewModeToggle from "@/app/components/ViewModeToggle";
-import MaskIcon from "@/app/components/MaskIcon";
+import { motion, LayoutGroup } from "motion/react";
+import { TABS, Tab, TAB_COUNTS, TAB_LABELS } from "@/app/config/constants";
 
 type Props = {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
   showNames: boolean;
   onShowNamesChange: (v: boolean) => void;
-  viewMode: "draw" | "code" | null;
-  onViewModeChange: (mode: "draw" | "code" | null) => void;
 };
 
-export default function NavTabs({ activeTab, onTabChange, showNames, onShowNamesChange, viewMode, onViewModeChange }: Props) {
-  const isArtistMind = activeTab === "ARTIST MIND";
-
+export default function NavTabs({ activeTab, onTabChange, showNames, onShowNamesChange }: Props) {
   return (
     <>
       <LayoutGroup>
@@ -45,7 +39,7 @@ export default function NavTabs({ activeTab, onTabChange, showNames, onShowNames
                   className="text-[14px] uppercase tracking-[0.08em] font-urbanist font-medium py-[4px]"
                   style={{ color: isActive ? "var(--text-primary)" : "var(--text-links)" }}
                 >
-                  {tab}
+                  {TAB_LABELS[tab]}
                 </span>
                 <span
                   className="font-inter text-[14px] leading-none"
@@ -64,29 +58,7 @@ export default function NavTabs({ activeTab, onTabChange, showNames, onShowNames
         </div>
       </LayoutGroup>
 
-      <div className="flex items-center justify-between">
-        <motion.div
-          className="flex items-center gap-[6px]"
-          animate={{ scale: isArtistMind ? 0.8 : 1, opacity: isArtistMind ? 0 : 1 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          style={{ pointerEvents: isArtistMind ? "none" : "auto" }}
-        >
-          <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
-          <AnimatePresence>
-            {viewMode && (
-              <motion.button
-                onClick={() => onViewModeChange(null)}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                className="flex items-center justify-center text-text-links hover:text-text-primary transition-colors cursor-pointer"
-              >
-                <MaskIcon src="/icons/crossicon.svg" />
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </motion.div>
+      <div className="flex items-center justify-end">
         <button
           onClick={() => onShowNamesChange(!showNames)}
           className={`py-[8px] px-[10px] rounded-full bg-divider/15 flex items-center justify-center font-urbanist font-medium text-[14px] tracking-[0.02em] transition-colors cursor-pointer ${showNames ? "text-text-primary" : "text-text-links hover:text-text-primary"}`}

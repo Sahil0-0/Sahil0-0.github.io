@@ -11,12 +11,11 @@ import ProjectAside from "@/app/view/projects/ProjectAside";
 import { Project } from "@/app/config/projects";
 import useIsMobile from "@/app/hooks/useIsMobile";
 import useOrientationLock from "@/app/hooks/useOrientationLock";
+import useDisableEdgeSwipeNav from "@/app/hooks/useDisableEdgeSwipeNav";
 import ForcedOrientation from "@/app/components/ForcedOrientation";
 import MobileTabHeader from "@/app/components/MobileTabHeader";
-import MobileFooter from "@/app/components/MobileFooter";
+import MobileHeader from "@/app/components/MobileFooter";
 import useDeviceClass from "@/app/hooks/useDeviceClass";
-
-const SHOW_DEV_BANNER = true;
 
 // How long to keep the main screen hidden after starting a back: long enough for
 // the strip to slide up and the project view to leave, so everything clears out
@@ -27,7 +26,6 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>(TABS[0]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showNames, setShowNames] = useState(false);
-  const [viewMode, setViewMode] = useState<"draw" | "code" | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobilePane, setMobilePane] = useState<"main" | "aside">("main");
   const isMobile = useIsMobile();
@@ -38,6 +36,7 @@ export default function Home() {
   const [mainVisible, setMainVisible] = useState(true);
 
   useOrientationLock();
+  useDisableEdgeSwipeNav();
   const stripTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const selectedProjectRef = useRef(selectedProject);
@@ -107,11 +106,6 @@ export default function Home() {
   return (
     <ForcedOrientation>
       <div className="h-full w-full overflow-hidden flex flex-col relative">
-      {SHOW_DEV_BANNER && (
-        <div className="shrink-0 bg-divider/15 text-text-su text-center text-xs font-semibold tracking-widest uppercase py-1.5 px-4 border-b border-divider">
-          Development under progress
-        </div>
-      )}
       <AnimatePresence>
         {(stripMounted && selectedProject) && (
           <ProjectStrip
@@ -122,16 +116,6 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-
-      {isPhone && !selectedProject && mainVisible && (
-        <motion.div
-          initial={isReturning.current ? { y: "-100%", opacity: 0 } : false}
-          animate={{ y: 0, opacity: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
-          className="shrink-0"
-        >
-          <MobileFooter />
-        </motion.div>
-      )}
 
       <div className="flex-1 min-h-0 flex relative">
         {!isMobile && (
@@ -154,7 +138,7 @@ export default function Home() {
                   opacity: 0,
                   transition: { duration: 0.15, delay: 0.3 },
                 }}
-                className="shrink-0 h-full w-1/4"
+                className="shrink-0 h-full w-[27.5%]"
                 onAnimationComplete={() => {
                   isReturning.current = false;
                 }}
@@ -165,8 +149,6 @@ export default function Home() {
                   onTabChange={setActiveTab}
                   showNames={showNames}
                   onShowNamesChange={setShowNames}
-                  viewMode={viewMode}
-                  onViewModeChange={setViewMode}
                 />
               </motion.div>
             )}
@@ -210,8 +192,6 @@ export default function Home() {
                       onTabChange={setActiveTab}
                       showNames={showNames}
                       onShowNamesChange={setShowNames}
-                      viewMode={viewMode}
-                      onViewModeChange={setViewMode}
                     />
                   </motion.div>
                 </>
@@ -237,7 +217,7 @@ export default function Home() {
                 activeTab={activeTab}
                 onProjectSelect={setSelectedProject}
                 showNames={showNames}
-                viewMode={viewMode}
+                topOverlay={isPhone ? <MobileHeader isReturning={isReturning.current} /> : undefined}
               />
             </motion.div>
           )}

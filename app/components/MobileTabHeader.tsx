@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, LayoutGroup } from "motion/react";
-import { TABS, Tab } from "@/app/config/constants";
+import { TABS, Tab, TAB_LABELS } from "@/app/config/constants";
 import AnimatedDivider from "@/app/components/AnimatedDivider";
 
 type Props = {
@@ -39,7 +39,7 @@ export default function MobileTabHeader({ activeTab, onTabChange }: Props) {
                 className="text-[13px] uppercase tracking-[0.06em] font-urbanist font-medium whitespace-nowrap"
                 style={{ color: isActive ? "var(--text-primary)" : "var(--text-links)" }}
               >
-                {tab}
+                {TAB_LABELS[tab]}
               </span>
             </button>
           );

@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import Plus from "@/app/components/Plus";
-import { Tab, EMAIL, LINKS, WORK_ICONS } from "@/app/config/constants";
+import { Tab, EMAIL, LINKS, WORK_ICONS, PART_TIME_ROLES } from "@/app/config/constants";
 import NavTabs from "@/app/components/NavTabs";
 import MaskIcon from "@/app/components/MaskIcon";
+import ScrambleCycleText from "@/app/components/ScrambleCycleText";
 
 const arrowVariants = {
   rest: { scale: 0.6, opacity: 0 },
@@ -34,8 +35,6 @@ type Props = {
   onTabChange: (tab: Tab) => void;
   showNames: boolean;
   onShowNamesChange: (v: boolean) => void;
-  viewMode: "draw" | "code" | null;
-  onViewModeChange: (mode: "draw" | "code" | null) => void;
 };
 
 export default function LeftPanel({
@@ -44,8 +43,6 @@ export default function LeftPanel({
   onTabChange,
   showNames,
   onShowNamesChange,
-  viewMode,
-  onViewModeChange,
 }: Props) {
   const [allGifs, setAllGifs] = useState<GifEntry[]>([]);
   const [gif, setGif] = useState<GifEntry | null>(null);
@@ -132,7 +129,7 @@ export default function LeftPanel({
           <Plus />
           <Plus />
         </div>
-        <div className="flex items-center justify-center flex-row gap-[24px] px-[24px] max-lg:px-0">
+        <div className="flex items-center justify-start flex-row gap-[24px] px-[24px] max-lg:px-0">
           <Image
             src="/images/profileImage.png"
             alt="Sahil Singh"
@@ -149,14 +146,14 @@ export default function LeftPanel({
               />
             </p>
             <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[clamp(8px,0.9vw,12px)] mt-[24px]">
-              <ScrambleText text="Developer" delayMs={600} durationMs={800} />
-            </p>
-            <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[clamp(8px,0.9vw,12px)] mt-[12px]">
               <ScrambleText
                 text="Design Engineer"
-                delayMs={850}
+                delayMs={600}
                 durationMs={800}
               />
+            </p>
+            <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[clamp(8px,0.9vw,12px)] mt-[12px]">
+              <ScrambleCycleText words={PART_TIME_ROLES} />
             </p>
           </div>
         </div>
@@ -169,13 +166,11 @@ export default function LeftPanel({
           onTabChange={onTabChange}
           showNames={showNames}
           onShowNamesChange={onShowNamesChange}
-          viewMode={viewMode}
-          onViewModeChange={onViewModeChange}
         />
         <div className="flex justify-between mt-[24px]">
           <Plus />
           <div className="flex items-center bg-divider/10 px-[16px] py-[10px] rounded-full">
-            <p className="uppercase text-text-links font-inter font-medium leading-none tracking-[0.08em] text-[clamp(8px,0.9vw,12px)]">
+            <p className="uppercase text-text-subtitle font-inter font-medium leading-none tracking-[0.08em] text-[clamp(8px,0.9vw,12px)]">
               Available for work
             </p>
           </div>

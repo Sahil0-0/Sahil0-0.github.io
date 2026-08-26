@@ -1,17 +1,18 @@
 import { getUnique } from "@/app/config/projects";
 
-export const TABS = ["WORK", "PLAYGROUND", "ARTIST MIND"] as const;
+export const TABS = ["WORK", "ARTIST MIND", "PLAYGROUND"] as const;
 export type Tab = (typeof TABS)[number];
+
+export const TAB_LABELS: Record<Tab, string> = {
+  "WORK": "WORK",
+  "ARTIST MIND": "ART",
+  "PLAYGROUND": "PLAYGROUND",
+};
 
 export const TAB_TAG: Record<Tab, string> = {
   "WORK": "work",
   "PLAYGROUND": "projects",
   "ARTIST MIND": "art",
-};
-
-export const VIEW_MODE_TAG: Record<"draw" | "code", string> = {
-  draw: "design",
-  code: "code",
 };
 
 export const TAB_COUNTS: Record<Tab, number> = {
@@ -25,8 +26,10 @@ export const EMAIL = "codedbysahil@gmail.com";
 export const PROFILE = {
   image: "/images/profileImage.png",
   name: "Sahil Singh",
-  roles: ["Developer", "Design Engineer"],
+  roles: ["Design Engineer"],
 };
+
+export const PART_TIME_ROLES = ["Artist", "Gamer", "Lyricist", "Designer", "Dreamer"];
 
 export const LINKS = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/codedbysahil", external: true },

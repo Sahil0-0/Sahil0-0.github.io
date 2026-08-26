@@ -5,68 +5,88 @@ import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Project } from "@/app/config/projects";
 import { getUnique } from "@/app/config/projects";
-import { Tab, TAB_TAG, VIEW_MODE_TAG } from "@/app/config/constants";
+import { Tab, TAB_TAG } from "@/app/config/constants";
 
 type Props = {
   activeTab: Tab;
   onProjectSelect: (project: Project | null) => void;
   isReturning?: boolean;
   showNames: boolean;
-  viewMode: "draw" | "code" | null;
+  topOverlay?: React.ReactNode;
 };
 
-export default function MainPanel({ activeTab, onProjectSelect, isReturning = false, showNames, viewMode }: Props) {
+export default function MainPanel({ activeTab, onProjectSelect, isReturning = false, showNames, topOverlay }: Props) {
   const isInitialMount = useRef(true);
+  const scrollRef = useRef<HTMLElement>(null);
   useEffect(() => { isInitialMount.current = false; }, []);
-  const isArtistMind = activeTab === "ARTIST MIND";
-  const filtered = isArtistMind
-    ? getUnique("art")
-    : viewMode
-    ? getUnique(TAB_TAG[activeTab], VIEW_MODE_TAG[viewMode])
-    : getUnique(TAB_TAG[activeTab]);
+  const filtered = getUnique(TAB_TAG[activeTab]);
 
-  // Returning from a project: hold a short beat after the strip has slid out
-  // before the tiles pop back in, and let them ease in a touch slower. First
-  // page load keeps the longer intro delay; tab switches stay snappy.
-  // On return the header/top chrome slides in first; hold the tiles a bit longer
-  // so they follow it rather than coming in together.
   const baseDelay = isReturning ? 0.4 : isInitialMount.current ? 0.62 : 0;
-  const enterDuration = isReturning ? 0.45 : 0.22;
-  const enterStagger = isReturning ? 0.03 : 0.02;
-  // Softer landing on the way back so the tiles settle rather than snap.
-  const enterEase = isReturning ? ([0.22, 1, 0.36, 1] as const) : "easeOut";
+  const enterDuration = isReturning ? 0.55 : 0.4;
+  const enterStagger = isReturning ? 0.1 : 0.1;
+  // Same soft landing curve everywhere so tiles ease in rather than snap.
+  const enterEase = [0.22, 1, 0.36, 1] as const;
 
   return (
-    <main className="flex-1 min-w-0 h-full overflow-y-auto no-scrollbar isolate" style={{ transform: "translateZ(0)" }}>
-      <div className="project-grid">
-        <AnimatePresence mode="popLayout">
-        {filtered.map((project, i) => (
-          <motion.div
-            key={`${project.image}-${activeTab}`}
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.15, ease: "easeIn", delay: i * 0.01 } }}
-            transition={{ duration: enterDuration, ease: enterEase, delay: baseDelay + i * enterStagger }}
-            className="overflow-hidden rounded-2xl group relative cursor-pointer"
-            style={{ gridColumn: `span ${project.span ?? 1}` }}
-            onClick={() => onProjectSelect(project)}
-          >
-            <Image
-              src={project.image}
-              alt={project.name}
-              fill
-              className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
-            />
-            <span
-              className={`absolute bottom-[8px] left-[8px] font-inter text-[11px] py-[4px] px-[8px] rounded-[8px] font-medium uppercase tracking-[0.08em] text-white pointer-events-none bg-background-dark/75 transition-all duration-200 translate-y-0
-                ${showNames ? "opacity-100" : "opacity-0 translate-y-[6px] group-hover:opacity-100 group-hover:translate-y-0"}`}
+    <main ref={scrollRef} className="main-scroll flex-1 min-w-0 h-full overflow-y-auto no-scrollbar isolate" style={{ transform: "translateZ(0)" }}>
+      {topOverlay}
+      <AnimatePresence
+        mode="wait"
+        onExitComplete={() => {
+          // Old grid is fully gone (invisible) before the new one mounts, so
+          // the scroll reset never shows up as a jump.
+          scrollRef.current?.scrollTo({ top: 0 });
+        }}
+      >
+        <motion.div
+          key={activeTab}
+          className="project-grid"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.2, delay: baseDelay } }}
+          exit={{ opacity: 0, transition: { duration: 0.15, ease: "easeIn" } }}
+        >
+          {filtered.map((project, i) => (
+            <motion.div
+              key={project.image}
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                transition: { duration: enterDuration, ease: enterEase, delay: baseDelay + i * enterStagger },
+              }}
+              className="overflow-hidden rounded-2xl group relative cursor-pointer"
+              style={{ gridColumn: `span ${project.span ?? 1}` }}
+              onClick={() => onProjectSelect(project)}
             >
-              {project.name}
-            </span>
-          </motion.div>
-        ))}
-        </AnimatePresence>
-      </div>
+              <Image
+                src={project.image}
+                alt={project.name}
+                fill
+                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+              />
+              <span
+                className={`absolute bottom-[8px] left-[8px] font-inter text-[11px] py-[4px] px-[8px] rounded-[8px] font-medium uppercase tracking-[0.08em] text-white pointer-events-none bg-background-dark/75 transition-all duration-200 translate-y-0
+                  ${showNames ? "opacity-100" : "opacity-0 translate-y-[6px] group-hover:opacity-100 group-hover:translate-y-0"}`}
+              >
+                {project.name}
+              </span>
+              <div
+                className={`absolute bottom-[8px] right-[8px] flex flex-col items-end gap-[4px] pointer-events-none transition-all duration-200 translate-y-0
+                  ${showNames ? "opacity-100" : "opacity-0 translate-y-[6px] group-hover:opacity-100 group-hover:translate-y-0"}`}
+              >
+                {project.stack.map((tech) => (
+                  <span
+                    key={tech}
+                    className="font-inter text-[11px] py-[4px] px-[8px] rounded-[8px] font-medium uppercase tracking-[0.08em] text-white bg-background-dark/75"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
     </main>
   );
 }
