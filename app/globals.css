@@ -43,7 +43,12 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: clamp(180px, 17vw, 300px);
-  grid-auto-flow: dense;
+  /* Deliberately not `dense`: back-filling lets a later square jump ahead of an
+     earlier wide tile, so the grid stops matching the order in projects.ts and
+     desktop stops matching phone. Measured across both layouts and every tab,
+     `dense` packed into exactly the same number of tracks as this does — it was
+     only reordering, never saving space. */
+  grid-auto-flow: row;
   align-content: stretch;
   padding: 24px;
   row-gap: 24px;
@@ -79,27 +84,59 @@ body {
   }
 }
 
-/* Phone: same grid tiles, but the grid itself scrolls horizontally (2 fixed
-   rows, columns generated left to right) instead of vertically. */
-[data-device="phone"] .main-scroll {
+/* Phone layout (phones, and tablets held in portrait): same grid tiles, but the
+   grid itself scrolls horizontally (2 fixed rows, columns generated left to
+   right) instead of vertically. */
+[data-layout="phone"] .main-scroll {
   display: flex;
   flex-direction: column;
   overflow-y: hidden;
 }
 
-[data-device="phone"] .project-grid {
+[data-layout="phone"] .project-grid {
   flex: 1;
   min-height: 0;
   grid-template-columns: none;
   grid-auto-rows: unset;
-  grid-template-rows: repeat(2, minmax(150px, 1fr));
+  /* Keep --phone-rows in step with the repeat() count below; the tile width
+     math depends on it. It stays a literal there because a var() inside
+     repeat() would take the whole declaration down with it on any engine that
+     doesn't substitute it, collapsing the grid to a single row.
+     minmax(0, …) rather than a min height: with this many rows a floor would
+     overflow the fixed-height (overflow-y: hidden) grid on a short phone. */
+  --phone-rows: 4;
+  --phone-gap: 14px;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  /* Columns instead of rows so the grid scrolls sideways; not `dense`, for the
+     same order-preserving reason as the base rule above. */
   grid-auto-flow: column;
-  grid-auto-columns: clamp(150px, 42vw, 260px);
+  grid-auto-columns: auto;
   overflow-x: auto;
   overflow-y: hidden;
   max-width: none;
   margin: 0;
   overscroll-behavior-x: none;
+  /* Lets the tiles below size themselves off this element's own height. Legal
+     here because the grid's height comes from `flex: 1` and its width from the
+     scroll container — neither depends on the tiles. */
+  container-type: size;
+}
+
+/* Phone tiles are sized by hand, because their height comes from the row tracks
+   but nothing would otherwise tell them how wide to be. One cell is a square —
+   the grid's content box holds every row plus the gaps between them, so a row
+   (and therefore a cell) is (100cqh - gaps) / rows. A tile then covers --span
+   cells plus the gaps it swallows between them, which keeps the desktop
+   mosaic's wide tiles wide here too. */
+[data-layout="phone"] .project-grid > * {
+  --phone-cell: calc(
+    (100cqh - (var(--phone-rows) - 1) * var(--phone-gap)) / var(--phone-rows)
+  );
+  width: clamp(120px, 40vw, 200px); /* fallback: pre-container-query browsers */
+  width: calc(
+    var(--span, 1) * var(--phone-cell) +
+    (var(--span, 1) - 1) * var(--phone-gap)
+  );
 }
 
 @keyframes marquee {

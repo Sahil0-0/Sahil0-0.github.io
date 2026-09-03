@@ -9,13 +9,13 @@ import ProjectStrip from "@/app/view/projects/ProjectStrip";
 import ProjectMain from "@/app/view/projects/ProjectMain";
 import ProjectAside from "@/app/view/projects/ProjectAside";
 import { Project } from "@/app/config/projects";
-import useIsMobile from "@/app/hooks/useIsMobile";
 import useOrientationLock from "@/app/hooks/useOrientationLock";
 import useDisableEdgeSwipeNav from "@/app/hooks/useDisableEdgeSwipeNav";
 import ForcedOrientation from "@/app/components/ForcedOrientation";
 import MobileTabHeader from "@/app/components/MobileTabHeader";
 import MobileHeader from "@/app/components/MobileFooter";
-import useDeviceClass from "@/app/hooks/useDeviceClass";
+import MobileGifStrip from "@/app/components/MobileGifStrip";
+import { useLayoutMode } from "@/app/hooks/useDeviceClass";
 
 // How long to keep the main screen hidden after starting a back: long enough for
 // the strip to slide up and the project view to leave, so everything clears out
@@ -26,10 +26,10 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>(TABS[0]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showNames, setShowNames] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobilePane, setMobilePane] = useState<"main" | "aside">("main");
-  const isMobile = useIsMobile();
-  const isPhone = useDeviceClass() === "phone";
+  // Phones and portrait tablets share one layout; desktop and landscape tablets
+  // share the other.
+  const isPhoneLayout = useLayoutMode() === "phone";
   const [stripMounted, setStripMounted] = useState(false);
   // Gates the main screen so it stays hidden while the project view slides out,
   // then reveals it (header first, projects after) once the exit has finished.
@@ -49,7 +49,6 @@ export default function Home() {
     if (selectedProject) {
       clearTimeout(closeTimer.current);
       setMainVisible(true);
-      setDrawerOpen(false);
       setMobilePane("main");
       stripTimer.current = setTimeout(() => setStripMounted(true), 490);
       if (!hasHistoryEntry.current) {
@@ -118,7 +117,7 @@ export default function Home() {
 
 
       <div className="flex-1 min-h-0 flex relative">
-        {!isMobile && (
+        {!isPhoneLayout && (
           <AnimatePresence>
             {!selectedProject && mainVisible && (
               <motion.div
@@ -155,51 +154,6 @@ export default function Home() {
           </AnimatePresence>
         )}
 
-        {isMobile && !isPhone && !selectedProject && mainVisible && (
-          <>
-            <button
-              aria-label="Open menu"
-              onClick={() => setDrawerOpen(true)}
-              className="absolute top-[12px] left-[12px] z-30 lg:hidden flex flex-col items-center justify-center gap-[5px] w-[42px] h-[42px] rounded-full bg-background/80 backdrop-blur border border-divider/40"
-            >
-              <span className="block w-[18px] h-[2px] bg-text-primary" />
-              <span className="block w-[18px] h-[2px] bg-text-primary" />
-              <span className="block w-[18px] h-[2px] bg-text-primary" />
-            </button>
-
-            <AnimatePresence>
-              {drawerOpen && (
-                <>
-                  <motion.div
-                    key="drawer-backdrop"
-                    className="fixed inset-0 z-40 bg-background-dark/40 lg:hidden"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={() => setDrawerOpen(false)}
-                  />
-                  <motion.div
-                    key="drawer-panel"
-                    className="fixed inset-y-0 left-0 z-40 w-[300px] max-w-[85%] bg-background overflow-y-auto no-scrollbar lg:hidden"
-                    initial={{ x: "-100%" }}
-                    animate={{ x: 0 }}
-                    exit={{ x: "-100%" }}
-                    transition={{ type: "spring", stiffness: 340, damping: 34 }}
-                  >
-                    <LeftPanel
-                      activeTab={activeTab}
-                      onTabChange={setActiveTab}
-                      showNames={showNames}
-                      onShowNamesChange={setShowNames}
-                    />
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </>
-        )}
-
         <AnimatePresence>
           {!selectedProject && mainVisible && (
             <motion.div
@@ -217,7 +171,7 @@ export default function Home() {
                 activeTab={activeTab}
                 onProjectSelect={setSelectedProject}
                 showNames={showNames}
-                topOverlay={isPhone ? <MobileHeader isReturning={isReturning.current} /> : undefined}
+                topOverlay={isPhoneLayout ? <MobileHeader isReturning={isReturning.current} /> : undefined}
               />
             </motion.div>
           )}
@@ -243,7 +197,7 @@ export default function Home() {
                   >
                     <ProjectMain project={selectedProject} />
                   </motion.div>
-                ) : isMobile ? (
+                ) : isPhoneLayout ? (
                   <motion.div
                     key="code-view-mobile"
                     className="w-full h-full flex flex-col overflow-hidden"
@@ -310,12 +264,13 @@ export default function Home() {
         </AnimatePresence>
       </div>
 
-      {isPhone && !selectedProject && mainVisible && (
+      {isPhoneLayout && !selectedProject && mainVisible && (
         <motion.div
           initial={isReturning.current ? { y: "100%", opacity: 0 } : false}
           animate={{ y: 0, opacity: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
-          className="shrink-0"
+          className="shrink-0 relative"
         >
+          <MobileGifStrip />
           <MobileTabHeader activeTab={activeTab} onTabChange={setActiveTab} />
         </motion.div>
       )}

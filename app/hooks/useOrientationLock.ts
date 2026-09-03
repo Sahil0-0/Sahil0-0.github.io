@@ -13,10 +13,11 @@ function getDeviceClass(): DeviceClass {
 }
 
 /**
- * Best-effort native orientation lock: phones → portrait, tablets → landscape.
- * Uses the Screen Orientation API, which only takes effect on browsers that
- * support it in the current context (mainly Android/Chrome, and typically only
- * in fullscreen/installed contexts). It silently no-ops elsewhere — notably on
+ * Best-effort native orientation lock: phones → portrait. Tablets are left
+ * unlocked, since they render a different layout per orientation. Uses the
+ * Screen Orientation API, which only takes effect on browsers that support it
+ * in the current context (mainly Android/Chrome, and typically only in
+ * fullscreen/installed contexts). It silently no-ops elsewhere — notably on
  * iOS Safari, which does not implement orientation locking at all.
  */
 export default function useOrientationLock() {
@@ -26,12 +27,7 @@ export default function useOrientationLock() {
       | undefined;
     if (!orientation || typeof orientation.lock !== "function") return;
 
-    const target =
-      getDeviceClass() === "phone"
-        ? "portrait"
-        : getDeviceClass() === "tablet"
-        ? "landscape"
-        : null;
+    const target = getDeviceClass() === "phone" ? "portrait" : null;
     if (!target) return;
 
     orientation.lock(target).catch(() => {

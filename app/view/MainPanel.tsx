@@ -40,7 +40,7 @@ export default function MainPanel({ activeTab, onProjectSelect, isReturning = fa
       >
         <motion.div
           key={activeTab}
-          className="project-grid"
+          className="project-grid no-scrollbar"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: 0.2, delay: baseDelay } }}
           exit={{ opacity: 0, transition: { duration: 0.15, ease: "easeIn" } }}
@@ -55,7 +55,13 @@ export default function MainPanel({ activeTab, onProjectSelect, isReturning = fa
                 transition: { duration: enterDuration, ease: enterEase, delay: baseDelay + i * enterStagger },
               }}
               className="overflow-hidden rounded-2xl group relative cursor-pointer"
-              style={{ gridColumn: `span ${project.span ?? 1}` }}
+              // --span mirrors the column span for the phone layout, which sizes
+              // tiles by hand (see globals.css) and needs to know how many
+              // columns a wide one covers.
+              style={{
+                gridColumn: `span ${project.span ?? 1}`,
+                "--span": project.span ?? 1,
+              } as React.CSSProperties}
               onClick={() => onProjectSelect(project)}
             >
               <Image

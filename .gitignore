@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+.Panels/
 
 # debug
 npm-debug.log*

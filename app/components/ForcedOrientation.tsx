@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { getDeviceClass, type DeviceClass } from "@/app/hooks/useDeviceClass";
+import { getDeviceClass, getLayoutMode, type DeviceClass } from "@/app/hooks/useDeviceClass";
 
 type Orientation = "portrait" | "landscape";
 
 const REQUIRED_ORIENTATION: Record<DeviceClass, Orientation | null> = {
   phone: "portrait",
-  tablet: "landscape",
+  tablet: null, // free to rotate — each orientation has its own layout
   desktop: null, // unrestricted
 };
 
 /**
  * Forces the app into a fixed orientation by rotating the whole UI 90° when the
- * device is held the "wrong" way — phones stay portrait, tablets stay landscape,
- * desktop is untouched. Because a transformed ancestor becomes the containing
- * block for `position: fixed` descendants, the drawer/backdrop rotate with it.
+ * device is held the "wrong" way — phones stay portrait, while tablets and
+ * desktop are untouched. Because a transformed ancestor becomes the containing
+ * block for `position: fixed` descendants, any fixed overlay rotates with it.
  */
 export default function ForcedOrientation({ children }: { children: ReactNode }) {
   const [style, setStyle] = useState<CSSProperties | null>(null);
@@ -24,8 +24,11 @@ export default function ForcedOrientation({ children }: { children: ReactNode })
     const update = () => {
       const deviceClass = getDeviceClass();
       // Published so CSS can target a device class without guessing from viewport
-      // width, which is unreliable once the UI is force-rotated.
+      // width, which is unreliable once the UI is force-rotated. `device` is the
+      // physical class (for touch affordances); `layout` is which of the two
+      // layouts is showing, which is what a tablet flips between as it rotates.
       document.documentElement.dataset.device = deviceClass;
+      document.documentElement.dataset.layout = getLayoutMode();
 
       const need = REQUIRED_ORIENTATION[deviceClass];
       const vw = window.innerWidth;
