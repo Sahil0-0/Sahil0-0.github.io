@@ -1,11 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Project } from "@/app/config/projects";
-import { getUnique } from "@/app/config/projects";
+import { getUnique, packBySpan } from "@/app/config/projects";
 import { Tab, TAB_TAG } from "@/app/config/constants";
+
+let clientSeed: number | null = null;
+const getClientSeed = () => (clientSeed ??= Math.floor(Math.random() * 2 ** 31));
+const subscribeNever = () => () => {};
 
 type Props = {
   activeTab: Tab;
@@ -19,12 +23,12 @@ export default function MainPanel({ activeTab, onProjectSelect, isReturning = fa
   const isInitialMount = useRef(true);
   const scrollRef = useRef<HTMLElement>(null);
   useEffect(() => { isInitialMount.current = false; }, []);
-  const filtered = getUnique(TAB_TAG[activeTab]);
+  const packSeed = useSyncExternalStore(subscribeNever, getClientSeed, () => 0);
+  const filtered = useMemo(() => packBySpan(getUnique(TAB_TAG[activeTab]), packSeed), [activeTab, packSeed]);
 
   const baseDelay = isReturning ? 0.4 : isInitialMount.current ? 0.62 : 0;
   const enterDuration = isReturning ? 0.55 : 0.4;
   const enterStagger = isReturning ? 0.1 : 0.1;
-  // Same soft landing curve everywhere so tiles ease in rather than snap.
   const enterEase = [0.22, 1, 0.36, 1] as const;
 
   return (
@@ -33,8 +37,6 @@ export default function MainPanel({ activeTab, onProjectSelect, isReturning = fa
       <AnimatePresence
         mode="wait"
         onExitComplete={() => {
-          // Old grid is fully gone (invisible) before the new one mounts, so
-          // the scroll reset never shows up as a jump.
           scrollRef.current?.scrollTo({ top: 0 });
         }}
       >
@@ -55,9 +57,6 @@ export default function MainPanel({ activeTab, onProjectSelect, isReturning = fa
                 transition: { duration: enterDuration, ease: enterEase, delay: baseDelay + i * enterStagger },
               }}
               className="overflow-hidden rounded-2xl group relative cursor-pointer"
-              // --span mirrors the column span for the phone layout, which sizes
-              // tiles by hand (see globals.css) and needs to know how many
-              // columns a wide one covers.
               style={{
                 gridColumn: `span ${project.span ?? 1}`,
                 "--span": project.span ?? 1,

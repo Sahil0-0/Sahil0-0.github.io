@@ -15,11 +15,11 @@ import ForcedOrientation from "@/app/components/ForcedOrientation";
 import MobileTabHeader from "@/app/components/MobileTabHeader";
 import MobileHeader from "@/app/components/MobileFooter";
 import MobileGifStrip from "@/app/components/MobileGifStrip";
+import PongLoader from "@/app/components/PongLoader";
 import { useLayoutMode } from "@/app/hooks/useDeviceClass";
+import useHomeAssetPreload from "@/app/hooks/useHomeAssetPreload";
 
-// How long to keep the main screen hidden after starting a back: long enough for
-// the strip to slide up and the project view to leave, so everything clears out
-// cleanly before the header slides in and the projects follow.
+const SPLASH_MS = 2000;
 const EXIT_MS = 340;
 
 export default function Home() {
@@ -27,13 +27,20 @@ export default function Home() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showNames, setShowNames] = useState(false);
   const [mobilePane, setMobilePane] = useState<"main" | "aside">("main");
-  // Phones and portrait tablets share one layout; desktop and landscape tablets
-  // share the other.
   const isPhoneLayout = useLayoutMode() === "phone";
   const [stripMounted, setStripMounted] = useState(false);
-  // Gates the main screen so it stays hidden while the project view slides out,
-  // then reveals it (header first, projects after) once the exit has finished.
-  const [mainVisible, setMainVisible] = useState(true);
+  const [mainVisible, setMainVisible] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+
+  useHomeAssetPreload();
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setShowSplash(false);
+      setMainVisible(true);
+    }, SPLASH_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   useOrientationLock();
   useDisableEdgeSwipeNav();
@@ -65,18 +72,11 @@ export default function Home() {
 
   useEffect(() => () => clearTimeout(closeTimer.current), []);
 
-  // Clear the "returning" flag once the back animations have settled. LeftPanel's
-  // onAnimationComplete only covers desktop, so this timer covers phone/tablet too
-  // (otherwise later tab switches would keep using the slower return timing).
   useEffect(() => {
     if (selectedProject || !isReturning.current) return;
     const t = setTimeout(() => { isReturning.current = false; }, 800);
     return () => clearTimeout(t);
   }, [selectedProject]);
-
-  // Back: slide everything out cleanly first — strip up + project view leaving —
-  // while the main screen stays hidden, then reveal it (header slides in, projects
-  // follow after their delay). Guard against a stray popstate when already on main.
   function beginClose() {
     if (!selectedProjectRef.current) return;
     isReturning.current = true;
@@ -91,7 +91,6 @@ export default function Home() {
   useEffect(() => {
     window.addEventListener("popstate", beginClose);
     return () => window.removeEventListener("popstate", beginClose);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleClose() {
@@ -105,6 +104,10 @@ export default function Home() {
   return (
     <ForcedOrientation>
       <div className="h-full w-full overflow-hidden flex flex-col relative">
+      <AnimatePresence>
+        {showSplash && <PongLoader key="pong-loader" />}
+      </AnimatePresence>
+
       <AnimatePresence>
         {(stripMounted && selectedProject) && (
           <ProjectStrip

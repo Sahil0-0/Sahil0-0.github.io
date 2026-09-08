@@ -27,6 +27,7 @@ export const projects: Project[] = [
     name: "Chronos",
     image: "/images/dev/chronos.png",
     tags: ["projects", "work", "code"],
+
     year: 2023,
     stack: ["React Native", "TypeScript"],
   },
@@ -56,6 +57,7 @@ export const projects: Project[] = [
     image: "/images/dev/zephyr.png",
     tags: ["projects", "code"],
     year: 2024,
+    span:2,
     stack: ["Vue", "Node.js"],
   },
   {
@@ -71,6 +73,7 @@ export const projects: Project[] = [
     image: "/images/dev/inkwell.png",
     tags: ["projects", "code"],
     year: 2023,
+    span:2,
     stack: ["Swift", "SwiftUI"],
   },
   {
@@ -201,6 +204,7 @@ export const projects: Project[] = [
     image: "/images/dev/beacon.png",
     tags: ["projects", "code"],
     year: 2024,
+    span:2,
     stack: ["React", "Node.js"],
   },
   {
@@ -227,4 +231,76 @@ export function getUnique(...tags: string[]) {
     seen.add(p.image);
     return true;
   });
+}
+
+const TRACK_SIZE = 4;
+function mulberry32(seed: number) {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffle<T>(items: T[], rand: () => number): T[] {
+  const out = items.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+ 
+function tightRowShapes(wideCount: number, squareCount: number, fullRows: number, remainderUnits: number) {
+  const shapes: Array<{ pairs: number; mixed: number; squares: number }> = [];
+  for (let pairs = 0; pairs * 2 <= wideCount; pairs++) {
+    for (let mixed = 0; mixed <= wideCount - pairs * 2; mixed++) {
+      const squares = fullRows - pairs - mixed;
+      if (squares < 0) continue;
+      const squaresUsed = mixed * 2 + squares * TRACK_SIZE;
+      if (squaresUsed > squareCount) continue;
+      const wideLeft = wideCount - pairs * 2 - mixed;
+      const squareLeft = squareCount - squaresUsed;
+      if (wideLeft > 1) continue;
+      if (wideLeft * 2 + squareLeft !== remainderUnits) continue;
+      shapes.push({ pairs, mixed, squares });
+    }
+  }
+  return shapes;
+}
+
+export function packBySpan<T extends { span?: number }>(items: T[], seed = 0): T[] {
+  const rand = mulberry32(seed);
+  const wide = shuffle(items.filter((p) => (p.span ?? 1) === 2), rand);
+  const square = shuffle(items.filter((p) => (p.span ?? 1) === 1), rand);
+
+  const totalUnits = wide.length * 2 + square.length;
+  if (totalUnits === 0) return [];
+
+  const fullRows = Math.floor(totalUnits / TRACK_SIZE);
+  const remainderUnits = totalUnits % TRACK_SIZE;
+  const shapes = tightRowShapes(wide.length, square.length, fullRows, remainderUnits);
+  if (!shapes.length) return [...wide, ...square];
+  const { pairs, mixed } = shapes[Math.floor(rand() * shapes.length)];
+
+  const rows: T[][] = [];
+  let w = 0;
+  let s = 0;
+  for (let i = 0; i < pairs; i++) rows.push([wide[w++], wide[w++]]);
+  for (let i = 0; i < mixed; i++) {
+    rows.push(shuffle([wide[w++], square[s++], square[s++]], rand));
+  }
+  while (s + TRACK_SIZE - 1 < square.length) {
+    rows.push(square.slice(s, s + TRACK_SIZE));
+    s += TRACK_SIZE;
+  }
+
+  const remainder = [...wide.slice(w), ...square.slice(s)];
+  const ordered = shuffle(rows, rand);
+  if (remainder.length) ordered.push(shuffle(remainder, rand));
+
+  return ordered.flat();
 }
